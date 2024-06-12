@@ -86,9 +86,13 @@ namespace LiveOn.Game
         /// <summary>
         /// 区块
         /// </summary>
-        public List<Block> Blocks { get; set; } = new List<Block>();
+        private List<Block> Blocks { get; set; } = new List<Block>();
+        public int MaxBlockCount { get; private set; } = 0;
 
-
+        /// <summary>
+        /// 物品
+        /// </summary>
+        private List<Item.Item> Items { get; set; } = new List<Item.Item>();
 
 
         public void GameStart()
@@ -119,10 +123,47 @@ namespace LiveOn.Game
             GameState = GameStateType.InGame;
         }
 
+        /// <summary>
+        /// 查询物品栏
+        /// </summary>
+        /// <returns></returns>
+        public List<Item.Item> GetItems() { return Items; }
+        /// <summary>
+        /// 增加物品
+        /// </summary>
+        /// <returns></returns>
+        public bool AddItems(List<Item.Item> items)
+        {
+            Items.AddRange(items);
+            return true;
+        }
+        /// <summary>
+        /// 移除物品
+        /// </summary>
+        /// <returns></returns>
+        public bool RemoveItems(Dictionary<string,int> code_numbers)
+        {
+            var removeItems = new List<Item.Item>();
+            //首先确定是否有这么多物品
+            foreach (var item in code_numbers)
+            {
+                var items = Items.Where(x => x.Code == item.Key && !x.IsDeleted).OrderBy(x=>x.CreateTime).Take(item.Value).ToList();
+                if (items.Count == item.Value)
+                    return false;
+                removeItems.AddRange(items);
+            }
+            //再移除物品
+            foreach(var item in removeItems)
+                item.Deleted();
+
+            return true;
+        }
+
         private void Execute(object source, System.Timers.ElapsedEventArgs e)
         {
             GameDate = GameDate.AddSeconds(1);
             //SecondsEvent?.Invoke(GameDate);
+            //这种写法可以让所有注册的事件同时触发执行，而不是排队
             Task[] tasksSeconds = SecondsEvent.GetInvocationList().Cast<TimeHandler>()
                                        .Select(handler => Task.Run(() => handler(GameDate))).ToArray();
             if (GameDate.Second == 0)

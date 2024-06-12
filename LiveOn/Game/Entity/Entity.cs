@@ -1,4 +1,6 @@
-﻿namespace LiveOn.Game.Entity
+﻿using LiveOn.Core;
+
+namespace LiveOn.Game.Entity
 {
     public partial class Entity
     {
@@ -23,56 +25,116 @@
 
         #region 树木
         /// <summary>
-        /// 树高
+        /// 树高（或初始高度）
         /// </summary>
-        public float Tree_High { get; set; }
+        public double Tree_High { get; set; }
 
         /// <summary>
         /// 树成长速率
         /// </summary>
-        public float Tree_GrowthRate { get; set; }
+        public double Tree_GrowthRate { get; set; }
 
 
         #endregion
 
 
+        #region 种子成长时间
 
-        public bool IsDeleted { get; set; }
+        /// <summary>
+        /// 种子成长时间(分钟)
+        /// </summary>
+        public int SeedGrowthTime { get; set; }
+
+        /// <summary>
+        /// 种子成长后的实体编码
+        /// </summary>
+        public string ToCode { get; set; }
+
+        #endregion
+
+        public bool IsDeleted { get; private set; }
 
 
-        public void Init(string code)
+        public bool Init(string code)
         {
+            var entityModel = VariableUtility.EntityModel.GetValueOrDefault(code);
+            if (entityModel == null)
+                return false;
+
+            Name = entityModel.Name;
+            Code = entityModel.Code;
+            Type = entityModel.Type;
             Id = Guid.NewGuid().ToString();
-            LifeTime = new DateTime(0);
+            LifeTime = new DateTime();
+            Description = entityModel.Description;
 
-            if (code == "0")
-            {
-                Type = EntityType.Tree;
-                Name = "杂树";
-
-            }
+            #region 树木
+            Tree_High = entityModel.Tree_High;
+            Tree_GrowthRate = entityModel.Tree_GrowthRate;
+            #endregion
+            #region 种子
+            SeedGrowthTime = entityModel.SeedGrowthTime;
+            ToCode = entityModel.ToCode;
+            #endregion
 
             //注册秒事件
-            switch (Type)
-            {
-                case EntityType.Tree:
-                    MainGame.Instance.SecondsEvent += SecondsEventExecute_X0;
-                    break;
+            MainGame.Instance.SecondsEvent += SecondsEventExecute;
 
-            }
+            return true;
+        }
+        public bool Deleted()
+        {
+            IsDeleted = true;
+            MainGame.Instance.SecondsEvent -= SecondsEventExecute;
+            return true;
         }
 
+        /// <summary>
+        /// 获取可执行的操作
+        /// </summary>
+        /// <returns></returns>
         public List<ScriptItem> GetScript()
         {
             switch (Type)
             {
                 case EntityType.Tree:
-                    return GetScript_X0();
+                    return GetScript_Tree();
+                case EntityType.Seed:
+                    return GetScript_Seed();
                 default:
                     return new List<ScriptItem>();
             }
         }
 
+        /// <summary>
+        /// 执行操作
+        /// </summary>
+        /// <param name="scriptCode"></param>
+        /// <returns></returns>
+        public bool ExecuteScript(string scriptCode)
+        {
+            switch (Type)
+            {
+                case EntityType.Tree:
+                    return ExecuteScript_Tree(scriptCode);
+                case EntityType.Seed:
+                    return ExecuteScript_Seed(scriptCode);
+                default:
+                    return false;
+            }
+        }
+
+        private async Task SecondsEventExecute(DateTime time)
+        {
+            switch (Type)
+            {
+                case EntityType.Tree:
+                    SecondsEventExecute_Tree(time);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public enum EntityType
@@ -81,5 +143,9 @@
         /// 树木
         /// </summary>
         Tree = 0,
+        /// <summary>
+        /// 种子
+        /// </summary>
+        Seed = 1,
     }
 }
