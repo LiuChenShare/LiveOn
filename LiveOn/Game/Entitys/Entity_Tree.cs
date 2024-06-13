@@ -1,7 +1,8 @@
 ﻿using LiveOn.Core;
+using LiveOn.Game.Items;
 using static LiveOn.Game.MainGame;
 
-namespace LiveOn.Game.Entity
+namespace LiveOn.Game.Entitys
 {
     /// <summary>
     /// 树木实体专用
@@ -87,16 +88,16 @@ namespace LiveOn.Game.Entity
                     int item1_quantity = (int)(high_decimalPart * 10);
                     int item2_quantity = high_integerPart;
 
-                    var item1s = new List<Item.Item>();
+                    var item1s = new List<Item>();
                     for (int i = 0; i < item1_quantity; i++)
                     {
-                        var item = new Item.Item();
+                        var item = new Item();
                         if (item.Init("1"))             //树枝
                             item1s.Add(item);
                     }
                     for (int i = 0; i < item2_quantity; i++)
                     {
-                        var item = new Item.Item();
+                        var item = new Item();
                         if (item.Init("2"))             //木材
                             item1s.Add(item);
                     }
@@ -124,16 +125,16 @@ namespace LiveOn.Game.Entity
             int item1_quantity = (int)(high_decimalPart * 10);
             int item2_quantity = high_integerPart;
 
-            var item1s = new List<Item.Item>();
+            var item1s = new List<Item>();
             for (int i = 0; i < item1_quantity; i++)
             {
-                var item = new Item.Item();
+                var item = new Item();
                 if (item.Init("1"))             //树枝
                     item1s.Add(item);
             }
             for (int i = 0; i < item2_quantity; i++)
             {
-                var item = new Item.Item();
+                var item = new Item();
                 if (item.Init("2"))             //木材
                     item1s.Add(item);
             }

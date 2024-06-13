@@ -1,5 +1,5 @@
-﻿using LiveOn.Game.Entity;
-using LiveOn.Game.Item;
+﻿using LiveOn.Game.Entitys;
+using LiveOn.Game.Items;
 
 namespace LiveOn.Core
 {
@@ -19,6 +19,10 @@ namespace LiveOn.Core
         /// </summary>
         public const string Script_Tree_XiuJian = "Script_Tree_XiuJian";
 
+        /// <summary>
+        /// 种植
+        /// </summary>
+        public const string Script_ZhongZhi = "Script_ZhongZhi";
         #endregion
 
         #region  实体

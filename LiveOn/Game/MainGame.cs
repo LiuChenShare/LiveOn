@@ -1,4 +1,5 @@
 ﻿using LiveOn.Game.DB;
+using LiveOn.Game.Items;
 using System.ComponentModel;
 using System.Drawing;
 using System.Security.Principal;
@@ -92,7 +93,7 @@ namespace LiveOn.Game
         /// <summary>
         /// 物品
         /// </summary>
-        private List<Item.Item> Items { get; set; } = new List<Item.Item>();
+        private List<Item> Items { get; set; } = new List<Item>();
 
 
         public void GameStart()
@@ -127,12 +128,12 @@ namespace LiveOn.Game
         /// 查询物品栏
         /// </summary>
         /// <returns></returns>
-        public List<Item.Item> GetItems() { return Items; }
+        public List<Item> GetItems() { return Items; }
         /// <summary>
         /// 增加物品
         /// </summary>
         /// <returns></returns>
-        public bool AddItems(List<Item.Item> items)
+        public bool AddItems(List<Item> items)
         {
             Items.AddRange(items);
             return true;
@@ -143,7 +144,7 @@ namespace LiveOn.Game
         /// <returns></returns>
         public bool RemoveItems(Dictionary<string,int> code_numbers)
         {
-            var removeItems = new List<Item.Item>();
+            var removeItems = new List<Item>();
             //首先确定是否有这么多物品
             foreach (var item in code_numbers)
             {

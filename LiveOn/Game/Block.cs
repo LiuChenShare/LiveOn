@@ -1,5 +1,5 @@
 ﻿using LiveOn.Core;
-using LiveOn.Game.Entity;
+using LiveOn.Game.Entitys;
 using System.Drawing;
 
 namespace LiveOn.Game
@@ -18,7 +18,7 @@ namespace LiveOn.Game
 
         //public string Item { get; set; }
 
-        public Game.Entity.Entity Entity { get; set; }
+        public Entity Entity { get; set; }
 
 
         /// <summary>
@@ -33,20 +33,19 @@ namespace LiveOn.Game
                 //种植
                 ScriptItem script_KanShu = new ScriptItem
                 {
-                    Name = "砍树",
-                    ScriptCode = VariableUtility.Script_Tree_KanShu,
-                    Description = "砍掉这棵树，可以收获木料和树枝"
+                    Name = "种植",
+                    ScriptCode = VariableUtility.Script_ZhongZhi,
+                    Description = "种点什么"
                 };
                 result.Add(script_KanShu);
             }
 
-            switch (Type)
+            if (Entity != null && !Entity.IsDeleted)
             {
-                case EntityType.Tree:
-                    return GetScript_Tree();
-                default:
-                    return new List<ScriptItem>();
+                result.AddRange(Entity.GetScript());
             }
+
+            return result;
         }
     }
 }

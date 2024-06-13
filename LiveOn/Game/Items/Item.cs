@@ -1,8 +1,8 @@
 ﻿using LiveOn.Core;
-using LiveOn.Game.Entity;
+using LiveOn.Game.Entitys;
 using System.Xml.Linq;
 
-namespace LiveOn.Game.Item
+namespace LiveOn.Game.Items
 {
     public partial class Item
     {

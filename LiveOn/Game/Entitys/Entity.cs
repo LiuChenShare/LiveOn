@@ -1,6 +1,6 @@
 ﻿using LiveOn.Core;
 
-namespace LiveOn.Game.Entity
+namespace LiveOn.Game.Entitys
 {
     public partial class Entity
     {

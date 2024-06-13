@@ -1,7 +1,7 @@
 ﻿using LiveOn.Core;
 using static LiveOn.Game.MainGame;
 
-namespace LiveOn.Game.Entity
+namespace LiveOn.Game.Entitys
 {
     /// <summary>
     /// 种子实体专用
