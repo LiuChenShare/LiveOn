@@ -1,5 +1,7 @@
-﻿using LiveOn.Game.Entitys;
+﻿using LiveOn.Game.Dungeons;
+using LiveOn.Game.Entitys;
 using LiveOn.Game.Items;
+using log4net.Core;
 
 namespace LiveOn.Core
 {
@@ -39,6 +41,22 @@ namespace LiveOn.Core
                 { "1", new Item() { Code = "1", Name = "树枝" } },
                 { "2", new Item() { Code = "2", Name = "木材" } }
             };
+        #endregion
+
+        #region 地下城
+        public static Dictionary<string, Dungeon> Dungeon = new Dictionary<string, Dungeon>
+        {
+            { "1", new Dungeon() { Code = "1", Name = "初始地下城",Level = 1, 
+                    Storeys = new List<Storey>(){ 
+                        new Storey() { Index =1, MonsterPool = new List<ProbabilityModel>(){ 
+                            new ProbabilityModel(){ //TODO 这里需要定义一些怪物和概率
+                                                    }
+                            } 
+                        }, 
+                    }
+                } 
+            },
+        };
         #endregion
     }
 
