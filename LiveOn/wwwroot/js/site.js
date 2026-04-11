@@ -116,16 +116,20 @@ function renderBlocks(blocks) {
 
         if (b.hasEntity) {
             cardClass += ' has-entity';
-            if (b.entityType === 'Tree') {
+            if (b.entityType === 'TreeEntity') {
                 iconClass = 'tree';
                 iconText = '🌳';
                 nameText = b.entityName || '树木';
-                infoText = '高度: ' + (b.treeHigh || 0).toFixed(1) + 'm';
-            } else if (b.entityType === 'Seed') {
+                infoText = '高度: ' + (b.properties && b.properties.tree_high ? b.properties.tree_high : 0).toFixed(1) + 'm';
+            } else if (b.entityType === 'SeedEntity') {
                 iconClass = 'seed';
                 iconText = '🌱';
                 nameText = b.entityName || '种子';
                 infoText = '生长中...';
+            } else {
+                iconClass = 'entity';
+                iconText = '❓';
+                nameText = b.entityName || '未知';
             }
         }
 
@@ -188,7 +192,7 @@ function openBlockDetail(blockId) {
 
         if (data.entity) {
             var e = data.entity;
-            var typeIcon = e.type === 'Tree' ? '🌳' : e.type === 'Seed' ? '🌱' : '?';
+            var typeIcon = e.type === 'TreeEntity' ? '🌳' : e.type === 'SeedEntity' ? '🌱' : '?';
 
             html += '<div class="block-detail-entity">';
             html += '<div class="entity-icon">' + typeIcon + '</div>';
@@ -199,13 +203,20 @@ function openBlockDetail(blockId) {
             html += '<div class="block-detail-stats">';
             html += '<div class="stat-item"><span class="stat-label">类型 </span><span class="stat-value">' + e.type + '</span></div>';
             html += '<div class="stat-item"><span class="stat-label">存活时间 </span><span class="stat-value">' + e.lifeTime + '</span></div>';
-            if (e.type === 'Tree') {
-                html += '<div class="stat-item"><span class="stat-label">树高 </span><span class="stat-value">' + e.treeHigh.toFixed(1) + ' m</span></div>';
-                html += '<div class="stat-item"><span class="stat-label">阶段 </span><span class="stat-value">' + e.stage + '</span></div>';
+
+            // 动态渲染子类特有属性
+            if (e.properties) {
+                var propLabels = { tree_high: '树高', growth_rate: '生长速率', growth_time: '成长时间', to_code: '目标编码' };
+                for (var key in e.properties) {
+                    var label = propLabels[key] || key;
+                    var val = e.properties[key];
+                    if (key === 'tree_high' || key === 'growth_rate') val = parseFloat(val).toFixed(2);
+                    if (key === 'growth_time') val = val + ' 分钟';
+                    html += '<div class="stat-item"><span class="stat-label">' + label + ' </span><span class="stat-value">' + val + '</span></div>';
+                }
             }
-            if (e.type === 'Seed') {
-                html += '<div class="stat-item"><span class="stat-label">成长时间 </span><span class="stat-value">' + e.seedGrowthTime + ' 分钟</span></div>';
-            }
+
+            html += '<div class="stat-item"><span class="stat-label">阶段 </span><span class="stat-value">' + e.stage + '</span></div>';
             html += '</div>';
         } else {
             html += '<div class="text-center py-3" style="color:var(--text-secondary);">这块地是空的，可以种植</div>';

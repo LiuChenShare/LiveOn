@@ -15,9 +15,9 @@
         public string Description { get; set; }
 
         /// <summary>
-        /// 脚本命令码
+        /// 交互标识码（如 "chop", "prune", "plant"）
         /// </summary>
-        public int ScriptCode { get; set; }
+        public string ScriptCode { get; set; }
 
         /// <summary>
         /// 子操作列表

@@ -33,13 +33,9 @@ namespace LiveOn.Game.DB
                     ""Name"" NVARCHAR,
                     ""Code"" NVARCHAR,
                     ""Description"" NVARCHAR,
-                    ""Type"" integer,
                     ""Stage"" integer,
                     ""LifeTime"" TIMESTAMP,
-                    ""TreeHigh"" real,
-                    ""TreeGrowthRate"" real,
-                    ""SeedGrowthTime"" integer,
-                    ""ToCode"" NVARCHAR,
+                    ""Properties"" TEXT,
                     ""IsDeleted"" integer,
                     PRIMARY KEY (""Id"")
                 );

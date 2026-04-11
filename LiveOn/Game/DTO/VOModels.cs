@@ -30,10 +30,10 @@ namespace LiveOn.Game.DTO
         public bool HasEntity { get; set; }
         /// <summary>实体名称</summary>
         public string EntityName { get; set; }
-        /// <summary>实体类型字符串</summary>
+        /// <summary>实体类型字符串（子类类名）</summary>
         public string EntityType { get; set; }
-        /// <summary>树高（仅树木类型）</summary>
-        public double? TreeHigh { get; set; }
+        /// <summary>实体属性（子类特有属性，如 tree_high 等）</summary>
+        public Dictionary<string, object> Properties { get; set; } = new();
     }
 
     /// <summary>
@@ -64,18 +64,14 @@ namespace LiveOn.Game.DTO
         public string Code { get; set; }
         /// <summary>实体描述</summary>
         public string Description { get; set; }
-        /// <summary>实体类型字符串</summary>
+        /// <summary>实体类型（子类类名）</summary>
         public string Type { get; set; }
-        /// <summary>树高</summary>
-        public double TreeHigh { get; set; }
         /// <summary>成长阶段</summary>
         public int Stage { get; set; }
         /// <summary>存活时间</summary>
         public string LifeTime { get; set; }
-        /// <summary>种子成长所需游戏分钟数</summary>
-        public int SeedGrowthTime { get; set; }
-        /// <summary>成熟后转化目标编码</summary>
-        public string ToCode { get; set; }
+        /// <summary>子类特有属性</summary>
+        public Dictionary<string, object> Properties { get; set; } = new();
     }
 
     /// <summary>
@@ -87,8 +83,8 @@ namespace LiveOn.Game.DTO
         public string Name { get; set; }
         /// <summary>脚本描述</summary>
         public string Description { get; set; }
-        /// <summary>脚本代码</summary>
-        public int ScriptCode { get; set; }
+        /// <summary>交互标识码</summary>
+        public string ScriptCode { get; set; }
     }
 
     /// <summary>

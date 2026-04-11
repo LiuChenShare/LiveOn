@@ -120,15 +120,21 @@ namespace LiveOn.Game
             // 预置4棵杂树
             for (int i = 0; i < 4; i++)
             {
-                var tree = new Entity();
-                tree.Init("0");
-                Grain.Instance.Blocks[i].Entity = tree;
+                var tree = Entity.Create("0");
+                if (tree != null)
+                {
+                    tree.Init("0");
+                    Grain.Instance.Blocks[i].Entity = tree;
+                }
             }
 
             // 预置1颗种子
-            var seed = new Entity();
-            seed.Init("1");
-            Grain.Instance.Blocks[4].Entity = seed;
+            var seed = Entity.Create("1");
+            if (seed != null)
+            {
+                seed.Init("1");
+                Grain.Instance.Blocks[4].Entity = seed;
+            }
 
             // 初始物品
             var initItems = new List<Item>();
@@ -199,14 +205,11 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取所有物品列表
         /// </summary>
-        /// <returns>物品列表</returns>
         public List<Item> GetItems() { return Grain.Instance.Items; }
 
         /// <summary>
         /// 添加物品到背包
         /// </summary>
-        /// <param name="items">要添加的物品列表</param>
-        /// <returns>是否添加成功</returns>
         public bool AddItems(List<Item> items)
         {
             Grain.Instance.Items.AddRange(items);
@@ -216,8 +219,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 按物品编码批量移除物品
         /// </summary>
-        /// <param name="code_numbers">物品编码与数量的键值对</param>
-        /// <returns>是否移除成功</returns>
         public bool RemoveItems(Dictionary<string, int> code_numbers)
         {
             var removeItems = new List<Item>();
@@ -241,7 +242,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取游戏状态摘要信息
         /// </summary>
-        /// <returns>游戏状态视图对象</returns>
         public GameStateVO GetGameStateSummary()
         {
             var grain = Grain.Instance;
@@ -258,47 +258,71 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取所有区块的概览信息
         /// </summary>
-        /// <returns>区块概览列表</returns>
         public List<BlockOverviewVO> GetBlocksOverview()
         {
-            return Grain.Instance.Blocks.Select(b => new BlockOverviewVO
+            return Grain.Instance.Blocks.Select(b =>
             {
-                Id = b.Id,
-                Stata = b.Stata,
-                HasEntity = b.Entity != null && !b.Entity.IsDeleted,
-                EntityName = b.Entity?.Name,
-                EntityType = b.Entity?.Type.ToString(),
-                TreeHigh = b.Entity?.Tree_High
+                var vo = new BlockOverviewVO
+                {
+                    Id = b.Id,
+                    Stata = b.Stata,
+                    HasEntity = b.Entity != null && !b.Entity.IsDeleted,
+                    EntityName = b.Entity?.Name,
+                    EntityType = b.Entity?.GetType().Name,
+                };
+
+                // 树木显示高度
+                if (b.Entity is TreeEntity tree)
+                {
+                    vo.Properties["tree_high"] = tree.TreeHigh;
+                }
+
+                return vo;
             }).ToList();
         }
 
         /// <summary>
         /// 获取指定区块的详细信息
         /// </summary>
-        /// <param name="blockId">区块ID</param>
-        /// <returns>区块详细信息；区块不存在时返回 null</returns>
         public BlockDetailVO GetBlockDetail(int blockId)
         {
             var block = Grain.Instance.Blocks.FirstOrDefault(b => b.Id == blockId);
             if (block == null) return null;
 
-            return new BlockDetailVO
+            EntityDetailVO entityVO = null;
+            if (block.Entity != null && !block.Entity.IsDeleted)
             {
-                Id = block.Id,
-                Stata = block.Stata,
-                Entity = block.Entity == null || block.Entity.IsDeleted ? null : new EntityDetailVO
+                entityVO = new EntityDetailVO
                 {
                     Id = block.Entity.Id,
                     Name = block.Entity.Name,
                     Code = block.Entity.Code,
                     Description = block.Entity.Description,
-                    Type = block.Entity.Type.ToString(),
-                    TreeHigh = block.Entity.Tree_High,
+                    Type = block.Entity.GetType().Name,
                     Stage = block.Entity.Stage,
                     LifeTime = block.Entity.LifeTime.ToString("HH:mm:ss"),
-                    SeedGrowthTime = block.Entity.SeedGrowthTime,
-                    ToCode = block.Entity.ToCode
-                },
+                    Properties = new Dictionary<string, object>()
+                };
+
+                // 树木特有属性
+                if (block.Entity is TreeEntity tree)
+                {
+                    entityVO.Properties["tree_high"] = tree.TreeHigh;
+                    entityVO.Properties["growth_rate"] = tree.GrowthRate;
+                }
+                // 种子特有属性
+                else if (block.Entity is SeedEntity seed)
+                {
+                    entityVO.Properties["growth_time"] = seed.GrowthTime;
+                    entityVO.Properties["to_code"] = seed.ToCode;
+                }
+            }
+
+            return new BlockDetailVO
+            {
+                Id = block.Id,
+                Stata = block.Stata,
+                Entity = entityVO,
                 Scripts = block.GetScript().Select(s => new ScriptVO { Name = s.Name, Description = s.Description, ScriptCode = s.ScriptCode }).ToList()
             };
         }
@@ -306,7 +330,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取物品汇总信息，按编码分组统计数量
         /// </summary>
-        /// <returns>物品汇总列表</returns>
         public List<ItemSummaryVO> GetItemSummary()
         {
             return Grain.Instance.Items.Where(x => !x.IsDeleted)
@@ -323,8 +346,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取最近的日志记录
         /// </summary>
-        /// <param name="count">要获取的日志条数</param>
-        /// <returns>日志视图对象列表</returns>
         public List<GameLogVO> GetLogs(int count)
         {
             var logs = DBResponse.GetGameLogs(count);
@@ -339,9 +360,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 分页获取日志记录
         /// </summary>
-        /// <param name="page">页码（从1开始）</param>
-        /// <param name="pageSize">每页条数</param>
-        /// <returns>日志列表、总条数、总页数</returns>
         public (List<GameLogVO> logs, int totalCount, int totalPages) GetLogsPaged(int page, int pageSize)
         {
             var totalCount = DBResponse.GetGameLogCount();
@@ -359,9 +377,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 写入一条游戏日志
         /// </summary>
-        /// <param name="source">日志来源</param>
-        /// <param name="content">日志内容</param>
-        /// <param name="type">日志类型（0=info, 1=success, 2=error）</param>
         private void AddLog(string source, string content, int type = 0)
         {
             DBResponse.AddGameLog(type, source, content, GameDate);
@@ -374,17 +389,18 @@ namespace LiveOn.Game
         #region 区块操作
 
         /// <summary>
-        /// 对指定区块执行脚本操作（如种植、砍树、修剪等）
+        /// 对指定区块执行交互操作
         /// </summary>
         /// <param name="blockId">区块ID</param>
-        /// <param name="scriptCode">脚本命令码</param>
+        /// <param name="interactionId">交互标识（如 "plant", "chop", "prune"）</param>
         /// <returns>操作是否成功及消息</returns>
-        public (bool success, string message) ExecuteBlockScript(int blockId, int scriptCode)
+        public (bool success, string message) ExecuteBlockScript(int blockId, string interactionId)
         {
             var block = Grain.Instance.Blocks.FirstOrDefault(b => b.Id == blockId);
             if (block == null) return (false, "区块不存在");
 
-            if (scriptCode == (int)ScriptComd.ZhongZhi)
+            // 种植（区块操作，不走实体交互）
+            if (interactionId == "plant")
             {
                 var seedItem = Grain.Instance.Items.FirstOrDefault(x => x.Code == "1" && !x.IsDeleted);
                 if (seedItem == null)
@@ -393,7 +409,13 @@ namespace LiveOn.Game
                     return (false, "没有种子可以种植");
                 }
 
-                var entity = new Entity();
+                var entity = Entity.Create("1");
+                if (entity == null)
+                {
+                    AddLog("种植", "种植失败，实体创建失败");
+                    return (false, "无法创建实体");
+                }
+
                 entity.Init("1");
                 block.Entity = entity;
                 seedItem.Deleted();
@@ -402,29 +424,37 @@ namespace LiveOn.Game
                 return (true, "成功种植了一颗杂树种子");
             }
 
+            // 实体交互 — 直接多态调用
             if (block.Entity != null && !block.Entity.IsDeleted)
             {
-                if (scriptCode == (int)ScriptComd.KanShu)
-                {
-                    block.Entity.ExecuteScript(scriptCode);
-                    block.Entity = null;
-                    SaveGame();
-                    AddLog("伐木", "砍树成功，获得了木材和树枝", 1);
-                    return (true, "砍树成功，获得了木材和树枝");
-                }
+                var (success, drops, destroy) = block.Entity.ExecuteInteraction(interactionId);
+                if (!success)
+                    return (false, "操作失败");
 
-                var result = block.Entity.ExecuteScript(scriptCode);
-                if (result && scriptCode == (int)ScriptComd.XiuJian)
-                {
-                    SaveGame();
-                    AddLog("修剪", "修剪成功，获得了树枝", 1);
-                    return (true, "修剪成功，获得了树枝");
-                }
-                AddLog("操作", result ? "操作成功" : "操作失败", result ? 1 : 2);
-                return (result, result ? "操作成功" : "操作失败");
+                if (drops != null && drops.Count > 0)
+                    Grain.Instance.Items.AddRange(drops);
+
+                if (destroy)
+                    block.Entity = null;
+
+                SaveGame();
+
+                // 获取交互名称用于日志
+                var interactionName = block.Entity?.GetInteractions()
+                    .FirstOrDefault(i => i.ScriptCode == interactionId)?.Name ?? interactionId;
+                AddLog("操作", $"执行了 {interactionName}", 1);
+                return (true, "操作成功");
             }
 
             return (false, "该区块无法执行此操作");
+        }
+
+        /// <summary>
+        /// 根据实体查找所在区块
+        /// </summary>
+        public Block FindBlockByEntity(Entity entity)
+        {
+            return Grain.Instance.Blocks.FirstOrDefault(b => b.Entity == entity);
         }
 
         #endregion
@@ -509,20 +539,21 @@ namespace LiveOn.Game
                 var entityMap = new Dictionary<string, Entity>();
                 foreach (var dbEntity in dbEntitys)
                 {
-                    var entity = new Entity();
+                    var entity = Entity.Create(dbEntity.Code);
+                    if (entity == null) continue;
+
                     entity.Id = dbEntity.Id;
-                    entity.Name = dbEntity.Name;
                     entity.Code = dbEntity.Code;
                     entity.Description = dbEntity.Description;
-                    entity.Type = (EntityType)dbEntity.Type;
                     entity.Stage = dbEntity.Stage;
                     entity.LifeTime = dbEntity.LifeTime;
-                    entity.Tree_High = dbEntity.TreeHigh;
-                    entity.Tree_GrowthRate = dbEntity.TreeGrowthRate;
-                    entity.SeedGrowthTime = dbEntity.SeedGrowthTime;
-                    entity.ToCode = dbEntity.ToCode;
+                    entity.DeserializeProperties(dbEntity.Properties ?? "{}");
 
-                    SecondsEvent += entity.SecondsEventExecute;
+                    // Name 可能被子类 InitProperties 覆盖，从数据库直接恢复
+                    entity.Name = dbEntity.Name;
+
+                    // 注册秒事件
+                    SecondsEvent += entity.OnTick;
                     entityMap[entity.Id] = entity;
                 }
 

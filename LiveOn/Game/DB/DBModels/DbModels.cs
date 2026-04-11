@@ -27,7 +27,7 @@ namespace LiveOn.Game.DBModels
     }
 
     /// <summary>
-    /// 实体（树、种子等）
+    /// 实体（树、种子等）— 子类特有属性通过 Properties JSON 列存储
     /// </summary>
     public class DbEntity
     {
@@ -35,20 +35,13 @@ namespace LiveOn.Game.DBModels
         public string Name { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
-        /// <summary>实体类型（0=Seed, 1=Tree）</summary>
-        public int Type { get; set; }
         /// <summary>成长阶段</summary>
         public int Stage { get; set; }
         /// <summary>存活时间</summary>
         public DateTime LifeTime { get; set; }
-        /// <summary>树高</summary>
-        public double TreeHigh { get; set; }
-        /// <summary>树生长速率</summary>
-        public double TreeGrowthRate { get; set; }
-        /// <summary>种子成长所需游戏分钟数</summary>
-        public int SeedGrowthTime { get; set; }
-        /// <summary>成熟后转化目标Code</summary>
-        public string ToCode { get; set; }
+        /// <summary>子类特有属性 JSON</summary>
+        public string Properties { get; set; }
+        /// <summary>是否已删除</summary>
         public bool IsDeleted { get; set; }
     }
 

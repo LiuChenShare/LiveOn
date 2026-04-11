@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace LiveOn.Game
 {
     /// <summary>
-    /// 统一命令码
+    /// 统一命令码（仅保留区块级操作，实体级操作由子类自行定义）
     /// </summary>
     public enum ScriptComd
     {
@@ -12,17 +12,5 @@ namespace LiveOn.Game
         /// </summary>
         [Description("种植")]
         ZhongZhi = 100001,
-
-        /// <summary>
-        /// 砍树
-        /// </summary>
-        [Description("砍树")]
-        KanShu = 100002,
-
-        /// <summary>
-        /// 修剪
-        /// </summary>
-        [Description("修剪")]
-        XiuJian = 100003,
     }
 }

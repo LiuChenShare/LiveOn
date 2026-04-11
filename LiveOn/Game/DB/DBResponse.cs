@@ -137,34 +137,33 @@ namespace LiveOn.Game
             {
                 foreach (var entity in entitys)
                 {
+                    var propertiesJson = entity.SerializeProperties();
                     var exists = conn.GetModelFromSql<DBModels.DbEntity>("SELECT * FROM Entity WHERE Id=@Id;",
                         new { Id = entity.Id }).FirstOrDefault();
 
                     if (exists == null)
                     {
-                        conn.Execute(@"INSERT INTO Entity(Id, Name, Code, Description, Type, Stage, LifeTime, TreeHigh, TreeGrowthRate, SeedGrowthTime, ToCode, IsDeleted)
-                                      VALUES (@Id, @Name, @Code, @Description, @Type, @Stage, @LifeTime, @TreeHigh, @TreeGrowthRate, @SeedGrowthTime, @ToCode, @IsDeleted);",
+                        conn.Execute(@"INSERT INTO Entity(Id, Name, Code, Description, Stage, LifeTime, Properties, IsDeleted)
+                                      VALUES (@Id, @Name, @Code, @Description, @Stage, @LifeTime, @Properties, @IsDeleted);",
                             new
                             {
                                 Id = entity.Id, Name = entity.Name, Code = entity.Code,
-                                Description = entity.Description, Type = (int)entity.Type,
+                                Description = entity.Description,
                                 Stage = entity.Stage, LifeTime = entity.LifeTime,
-                                TreeHigh = entity.Tree_High, TreeGrowthRate = entity.Tree_GrowthRate,
-                                SeedGrowthTime = entity.SeedGrowthTime, ToCode = entity.ToCode ?? "",
+                                Properties = propertiesJson,
                                 IsDeleted = entity.IsDeleted ? 1 : 0
                             });
                     }
                     else
                     {
-                        conn.Execute(@"UPDATE Entity SET Name=@Name, Code=@Code, Description=@Description, Type=@Type, Stage=@Stage, LifeTime=@LifeTime,
-                                      TreeHigh=@TreeHigh, TreeGrowthRate=@TreeGrowthRate, SeedGrowthTime=@SeedGrowthTime, ToCode=@ToCode, IsDeleted=@IsDeleted WHERE Id=@Id;",
+                        conn.Execute(@"UPDATE Entity SET Name=@Name, Code=@Code, Description=@Description,
+                                      Stage=@Stage, LifeTime=@LifeTime, Properties=@Properties, IsDeleted=@IsDeleted WHERE Id=@Id;",
                             new
                             {
                                 Id = entity.Id, Name = entity.Name, Code = entity.Code,
-                                Description = entity.Description, Type = (int)entity.Type,
+                                Description = entity.Description,
                                 Stage = entity.Stage, LifeTime = entity.LifeTime,
-                                TreeHigh = entity.Tree_High, TreeGrowthRate = entity.Tree_GrowthRate,
-                                SeedGrowthTime = entity.SeedGrowthTime, ToCode = entity.ToCode ?? "",
+                                Properties = propertiesJson,
                                 IsDeleted = entity.IsDeleted ? 1 : 0
                             });
                     }

@@ -1,6 +1,4 @@
-﻿using LiveOn.Core;
 using LiveOn.Game.Entitys;
-using System.Drawing;
 
 namespace LiveOn.Game
 {
@@ -19,8 +17,6 @@ namespace LiveOn.Game
         /// </summary>
         public int Stata { get; set; }
 
-        //public string Item { get; set; }
-
         /// <summary>
         /// 区块上的实体（如树木、种子等），为 null 表示区块空闲
         /// </summary>
@@ -30,25 +26,24 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取可执行的操作
         /// </summary>
-        /// <returns></returns>
         public List<ScriptItem> GetScript()
         {
             var result = new List<ScriptItem>();
 
-            if (Entity == null || Entity.IsDeleted) {
-                //种植
-                ScriptItem script_KanShu = new ScriptItem
+            if (Entity == null || Entity.IsDeleted)
+            {
+                // 种植是区块操作，不是实体操作
+                result.Add(new ScriptItem
                 {
                     Name = "种植",
-                    ScriptCode = (int)ScriptComd.ZhongZhi,
+                    ScriptCode = "plant",
                     Description = "种点什么"
-                };
-                result.Add(script_KanShu);
+                });
             }
 
             if (Entity != null && !Entity.IsDeleted)
             {
-                result.AddRange(Entity.GetScript());
+                result.AddRange(Entity.GetInteractions());
             }
 
             return result;

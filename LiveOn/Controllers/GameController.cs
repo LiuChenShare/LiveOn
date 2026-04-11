@@ -61,9 +61,9 @@ namespace LiveOn.Controllers
         /// 执行区块操作
         /// </summary>
         [HttpPost]
-        public IActionResult ExecuteScript(int blockId, int scriptCode)
+        public IActionResult ExecuteScript(int blockId, string interactionId)
         {
-            var (success, message) = MainGame.Instance.ExecuteBlockScript(blockId, scriptCode);
+            var (success, message) = MainGame.Instance.ExecuteBlockScript(blockId, interactionId);
             return Json(new { success, message });
         }
 

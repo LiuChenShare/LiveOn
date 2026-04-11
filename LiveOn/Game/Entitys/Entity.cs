@@ -1,187 +1,142 @@
-﻿using LiveOn.Core;
-using System.ComponentModel;
+using System.Text.Json;
 
 namespace LiveOn.Game.Entitys
 {
     /// <summary>
-    /// 实体基类，表示游戏中的各种可交互对象（树木、种子等）
+    /// 实体基类，表示游戏中的各种可交互对象
+    /// 子类通过静态构造函数调用 Register 注册自己，新增实体只需新建子类文件
     /// </summary>
-    public partial class Entity
+    public abstract class Entity
     {
+        #region 静态注册
+
         /// <summary>
-        /// 实体唯一标识
+        /// 实体注册表，Key 为编码，Value 为工厂方法
         /// </summary>
+        private static readonly Dictionary<string, Func<Entity>> _registry = new();
+
+        /// <summary>
+        /// 子类在静态构造函数中调用，将自身注册到工厂
+        /// </summary>
+        /// <typeparam name="T">子类类型，必须有 public 无参构造函数</typeparam>
+        /// <param name="code">实体编码</param>
+        protected static void Register<T>(string code) where T : Entity, new()
+        {
+            _registry[code] = () => new T();
+        }
+
+        /// <summary>
+        /// 根据编码创建对应子类实例，未注册的编码返回 null
+        /// </summary>
+        public static Entity Create(string code)
+        {
+            return _registry.TryGetValue(code, out var factory) ? factory() : null;
+        }
+
+        #endregion
+
+
+        #region 公共属性
+
+        /// <summary>实体唯一标识</summary>
         public string Id { get; internal set; }
 
-        /// <summary>
-        /// 实体名称
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// 实体编码
-        /// </summary>
+        /// <summary>实体编码（对应注册时的 code）</summary>
         public string Code { get; set; }
 
-        /// <summary>
-        /// 实体描述
-        /// </summary>
+        /// <summary>实体名称</summary>
+        public string Name { get; set; }
+
+        /// <summary>实体描述</summary>
         public string Description { get; set; }
 
-        /// <summary>
-        /// 实体类型
-        /// </summary>
-        public EntityType Type { get; set; }
-
-        /// <summary>
-        /// 阶段
-        /// </summary>
+        /// <summary>成长阶段</summary>
         public int Stage { get; set; }
 
-        /// <summary>
-        /// 生命时长
-        /// </summary>
+        /// <summary>生命时长</summary>
         public DateTime LifeTime { get; set; }
 
-
-        #region 树木
-        /// <summary>
-        /// 树高（或初始高度）
-        /// </summary>
-        public double Tree_High { get; set; }
-
-        /// <summary>
-        /// 树成长速率
-        /// </summary>
-        public double Tree_GrowthRate { get; set; }
-
-
-        #endregion
-
-
-        #region 种子成长时间
-
-        /// <summary>
-        /// 种子成长时间(分钟)
-        /// </summary>
-        public int SeedGrowthTime { get; set; }
-
-        /// <summary>
-        /// 种子成长后的实体编码
-        /// </summary>
-        public string ToCode { get; set; }
-
-        #endregion
-
-        /// <summary>
-        /// 是否已删除
-        /// </summary>
+        /// <summary>是否已删除</summary>
         public bool IsDeleted { get; private set; }
 
+        #endregion
+
+
+        #region 公共方法
 
         /// <summary>
-        /// 根据编码初始化实体，加载模板数据并注册秒事件
+        /// 根据编码初始化实体：创建实例 → 设置公共字段 → 初始化子类属性 → 注册秒事件
         /// </summary>
-        /// <param name="code">实体编码</param>
-        /// <returns>初始化成功返回 true，编码不存在返回 false</returns>
         public bool Init(string code)
         {
-            var entityModel = VariableUtility.EntityModel.GetValueOrDefault(code);
-            if (entityModel == null)
-                return false;
-
-            Name = entityModel.Name;
-            Code = entityModel.Code;
-            Type = entityModel.Type;
+            // 如果当前实例已经是正确的类型（由 Entity.Create 创建），直接初始化
+            Code = code;
+            Name = GetType().Name; // 默认用类名，子类可在 InitProperties 中覆盖
+            Description = "";
             Id = Guid.NewGuid().ToString();
-            LifeTime = new DateTime();
-            Description = entityModel.Description;
+            LifeTime = DateTime.MinValue;
+            Stage = 0;
 
-            #region 树木
-            Tree_High = entityModel.Tree_High;
-            Tree_GrowthRate = entityModel.Tree_GrowthRate;
-            #endregion
-            #region 种子
-            SeedGrowthTime = entityModel.SeedGrowthTime;
-            ToCode = entityModel.ToCode;
-            #endregion
+            InitProperties();
 
-            //注册秒事件
-            MainGame.Instance.SecondsEvent += SecondsEventExecute;
+            // 注册秒事件
+            MainGame.Instance.SecondsEvent += OnTick;
 
             return true;
         }
+
         /// <summary>
         /// 删除实体，标记为已删除并注销秒事件
         /// </summary>
-        /// <returns>删除成功返回 true</returns>
         public bool Deleted()
         {
             IsDeleted = true;
-            MainGame.Instance.SecondsEvent -= SecondsEventExecute;
+            MainGame.Instance.SecondsEvent -= OnTick;
             return true;
         }
 
-        /// <summary>
-        /// 获取可执行的操作
-        /// </summary>
-        /// <returns></returns>
-        public List<ScriptItem> GetScript()
-        {
-            switch (Type)
-            {
-                case EntityType.Tree:
-                    return GetScript_Tree();
-                case EntityType.Seed:
-                    return GetScript_Seed();
-                default:
-                    return new List<ScriptItem>();
-            }
-        }
+        #endregion
+
+
+        #region 子类必须实现的抽象方法
 
         /// <summary>
-        /// 执行操作
+        /// 初始化子类特有属性（在 Init 中调用）
         /// </summary>
-        /// <param name="scriptCode"></param>
-        /// <returns></returns>
-        public bool ExecuteScript(int scriptCode)
-        {
-            switch (Type)
-            {
-                case EntityType.Tree:
-                    return ExecuteScript_Tree(scriptCode);
-                case EntityType.Seed:
-                    return ExecuteScript_Seed(scriptCode);
-                default:
-                    return false;
-            }
-        }
+        public abstract void InitProperties();
 
         /// <summary>
-        /// 秒事件执行入口，根据实体类型分发到对应的秒事件处理方法
+        /// 获取可执行的交互列表
         /// </summary>
-        /// <param name="time">当前时间</param>
-        internal async Task SecondsEventExecute(DateTime time)
-        {
-            switch (Type)
-            {
-                case EntityType.Tree:
-                    SecondsEventExecute_Tree(time);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+        public abstract List<ScriptItem> GetInteractions();
 
-    /// <summary>
-    /// 实体类型枚举
-    /// </summary>
-    public enum EntityType
-    {
-        [Description("树木")]
-        Tree = 0,
-        [Description("种子")]
-        Seed = 1,
+        /// <summary>
+        /// 执行指定交互
+        /// </summary>
+        /// <param name="interactionId">交互 ID</param>
+        /// <returns>(是否成功, 掉落物品列表, 是否销毁实体)</returns>
+        public abstract (bool success, List<Items.Item> drops, bool destroy) ExecuteInteraction(string interactionId);
+
+        /// <summary>
+        /// 秒事件处理
+        /// </summary>
+        public abstract Task OnTick(DateTime time);
+
+        #endregion
+
+
+        #region 序列化（子类重写）
+
+        /// <summary>
+        /// 将子类特有属性序列化为 JSON 字符串，用于数据库持久化
+        /// </summary>
+        public virtual string SerializeProperties() => "{}";
+
+        /// <summary>
+        /// 从 JSON 字符串恢复子类特有属性，用于数据库加载
+        /// </summary>
+        public virtual void DeserializeProperties(string json) { }
+
+        #endregion
     }
 }

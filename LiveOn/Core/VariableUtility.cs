@@ -1,12 +1,11 @@
 ﻿using LiveOn.Game.Dungeons;
-using LiveOn.Game.Entitys;
 using LiveOn.Game.Items;
 using log4net.Core;
 
 namespace LiveOn.Core
 {
     /// <summary>
-    /// 全局变量工具类，存储活跃的 API 密钥、实体模型、物品模型和地下城数据
+    /// 全局变量工具类，存储活跃的 API 密钥、物品模型和地下城数据
     /// </summary>
     public class VariableUtility
     {
@@ -14,17 +13,6 @@ namespace LiveOn.Core
         /// 活跃的 API 密钥字典，Key 为 apiKey，Value 为元组（账号、用户ID、apiKey、上次使用时间）
         /// </summary>
         public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>> ActiveApiKeys = new System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>>();
-
-        #region  实体
-        /// <summary>
-        /// 实体模型字典，Key 为编码，Value 为实体定义
-        /// </summary>
-        public static Dictionary<string, Entity> EntityModel = new Dictionary<string, Entity>
-            {
-                { "0", new Entity() { Code = "0",Type = EntityType.Tree,Name = "杂树", Description="这是一颗不知名的树木。", Tree_High = 0.3, Tree_GrowthRate = 0.3} },
-                { "1", new Entity() { Code = "1",Type = EntityType.Tree,Name = "杂树种子", Description="这是一颗平平无奇的种子，有可能种出一颗成材的大树。", SeedGrowthTime = 10, ToCode="0"} },
-            };
-        #endregion
 
         #region  物品
         /// <summary>
@@ -43,15 +31,15 @@ namespace LiveOn.Core
         /// </summary>
         public static Dictionary<string, Dungeon> Dungeon = new Dictionary<string, Dungeon>
         {
-            { "1", new Dungeon() { Code = "1", Name = "初始地下城",Level = 1, 
-                    Storeys = new List<Storey>(){ 
-                        new Storey() { Index =1, MonsterPool = new List<ProbabilityModel>(){ 
+            { "1", new Dungeon() { Code = "1", Name = "初始地下城",Level = 1,
+                    Storeys = new List<Storey>(){
+                        new Storey() { Index =1, MonsterPool = new List<ProbabilityModel>(){
                             new ProbabilityModel(){ //TODO 这里需要定义一些怪物和概率
                                                     }
-                            } 
-                        }, 
+                            }
+                        },
                     }
-                } 
+                }
             },
         };
         #endregion
