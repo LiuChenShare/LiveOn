@@ -1,4 +1,5 @@
 using LiveOn.Game.DB;
+using LiveOn.Game.DTO;
 using LiveOn.Game.Entitys;
 using LiveOn.Game.Items;
 using System.ComponentModel;
@@ -13,7 +14,13 @@ namespace LiveOn.Game
         #region 单例
         private static volatile MainGame instance;
         private static object syncRoot = new Object();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public MainGame() { }
+        /// <summary>
+        /// 主游戏单例实例
+        /// </summary>
         public static MainGame Instance
         {
             get
@@ -49,9 +56,18 @@ namespace LiveOn.Game
         /// 消息委托
         /// </summary>
         public delegate void MsgHandler(int type, string source, string content);
+        /// <summary>
+        /// 消息事件，当游戏内产生消息时触发
+        /// </summary>
         public event MsgHandler MsgEvent;
 
+        /// <summary>
+        /// 通用委托，传递对象数组参数
+        /// </summary>
         public delegate void AllHandler(object[] objects);
+        /// <summary>
+        /// 异步通用委托，传递对象数组参数
+        /// </summary>
         public delegate void AllTaskHandler(object[] objects);
         #endregion
 
@@ -128,6 +144,9 @@ namespace LiveOn.Game
             AddLog("系统", "新的世界已创建");
         }
 
+        /// <summary>
+        /// 开始游戏，初始化游戏世界并启动游戏时钟
+        /// </summary>
         public void GameStart()
         {
             if (GameState == GameStateType.Init)
@@ -141,6 +160,9 @@ namespace LiveOn.Game
             AddLog("系统", "游戏开始");
         }
 
+        /// <summary>
+        /// 暂停游戏，停止游戏时钟
+        /// </summary>
         public void PauseGame()
         {
             GameTimer.Enabled = false;
@@ -149,6 +171,9 @@ namespace LiveOn.Game
             AddLog("系统", "游戏已暂停");
         }
 
+        /// <summary>
+        /// 继续游戏，恢复游戏时钟
+        /// </summary>
         public void ProceedGame()
         {
             EnsureTimerRegistered();
@@ -171,14 +196,28 @@ namespace LiveOn.Game
 
         #region 物品操作
 
+        /// <summary>
+        /// 获取所有物品列表
+        /// </summary>
+        /// <returns>物品列表</returns>
         public List<Item> GetItems() { return Grain.Instance.Items; }
 
+        /// <summary>
+        /// 添加物品到背包
+        /// </summary>
+        /// <param name="items">要添加的物品列表</param>
+        /// <returns>是否添加成功</returns>
         public bool AddItems(List<Item> items)
         {
             Grain.Instance.Items.AddRange(items);
             return true;
         }
 
+        /// <summary>
+        /// 按物品编码批量移除物品
+        /// </summary>
+        /// <param name="code_numbers">物品编码与数量的键值对</param>
+        /// <returns>是否移除成功</returns>
         public bool RemoveItems(Dictionary<string, int> code_numbers)
         {
             var removeItems = new List<Item>();
@@ -199,10 +238,14 @@ namespace LiveOn.Game
 
         #region 数据查询
 
-        public object GetGameStateSummary()
+        /// <summary>
+        /// 获取游戏状态摘要信息
+        /// </summary>
+        /// <returns>游戏状态视图对象</returns>
+        public GameStateVO GetGameStateSummary()
         {
             var grain = Grain.Instance;
-            return new
+            return new GameStateVO
             {
                 GameState = GameState.ToString(),
                 GameDate = GameDate.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -212,51 +255,64 @@ namespace LiveOn.Game
             };
         }
 
-        public List<object> GetBlocksOverview()
+        /// <summary>
+        /// 获取所有区块的概览信息
+        /// </summary>
+        /// <returns>区块概览列表</returns>
+        public List<BlockOverviewVO> GetBlocksOverview()
         {
-            return Grain.Instance.Blocks.Select(b => new
+            return Grain.Instance.Blocks.Select(b => new BlockOverviewVO
             {
-                b.Id,
-                b.Stata,
+                Id = b.Id,
+                Stata = b.Stata,
                 HasEntity = b.Entity != null && !b.Entity.IsDeleted,
                 EntityName = b.Entity?.Name,
                 EntityType = b.Entity?.Type.ToString(),
                 TreeHigh = b.Entity?.Tree_High
-            }).ToList<object>();
+            }).ToList();
         }
 
-        public object GetBlockDetail(int blockId)
+        /// <summary>
+        /// 获取指定区块的详细信息
+        /// </summary>
+        /// <param name="blockId">区块ID</param>
+        /// <returns>区块详细信息；区块不存在时返回 null</returns>
+        public BlockDetailVO GetBlockDetail(int blockId)
         {
             var block = Grain.Instance.Blocks.FirstOrDefault(b => b.Id == blockId);
             if (block == null) return null;
 
-            return new
+            return new BlockDetailVO
             {
-                block.Id,
-                block.Stata,
-                Entity = block.Entity == null || block.Entity.IsDeleted ? null : new
+                Id = block.Id,
+                Stata = block.Stata,
+                Entity = block.Entity == null || block.Entity.IsDeleted ? null : new EntityDetailVO
                 {
-                    block.Entity.Id,
-                    block.Entity.Name,
-                    block.Entity.Code,
-                    block.Entity.Description,
-                    block.Entity.Type,
-                    block.Entity.Tree_High,
-                    block.Entity.Stage,
+                    Id = block.Entity.Id,
+                    Name = block.Entity.Name,
+                    Code = block.Entity.Code,
+                    Description = block.Entity.Description,
+                    Type = block.Entity.Type.ToString(),
+                    TreeHigh = block.Entity.Tree_High,
+                    Stage = block.Entity.Stage,
                     LifeTime = block.Entity.LifeTime.ToString("HH:mm:ss"),
-                    block.Entity.SeedGrowthTime,
-                    block.Entity.ToCode
+                    SeedGrowthTime = block.Entity.SeedGrowthTime,
+                    ToCode = block.Entity.ToCode
                 },
-                Scripts = block.GetScript().Select(s => new { s.Name, s.Description, s.ScriptCode })
+                Scripts = block.GetScript().Select(s => new ScriptVO { Name = s.Name, Description = s.Description, ScriptCode = s.ScriptCode }).ToList()
             };
         }
 
-        public List<object> GetItemSummary()
+        /// <summary>
+        /// 获取物品汇总信息，按编码分组统计数量
+        /// </summary>
+        /// <returns>物品汇总列表</returns>
+        public List<ItemSummaryVO> GetItemSummary()
         {
             return Grain.Instance.Items.Where(x => !x.IsDeleted)
                 .GroupBy(x => new { x.Code, x.Name })
-                .Select(g => new { Code = g.Key.Code, Name = g.Key.Name, Count = g.Count() })
-                .ToList<object>();
+                .Select(g => new ItemSummaryVO { Code = g.Key.Code, Name = g.Key.Name, Count = g.Count() })
+                .ToList();
         }
 
         #endregion
@@ -264,31 +320,48 @@ namespace LiveOn.Game
 
         #region 日志
 
-        public List<object> GetLogs(int count)
+        /// <summary>
+        /// 获取最近的日志记录
+        /// </summary>
+        /// <param name="count">要获取的日志条数</param>
+        /// <returns>日志视图对象列表</returns>
+        public List<GameLogVO> GetLogs(int count)
         {
             var logs = DBResponse.GetGameLogs(count);
-            return logs.Select(l => new
+            return logs.Select(l => new GameLogVO
             {
-                l.Id, l.Type, l.Source, l.Content,
+                Id = l.Id, Type = l.Type, Source = l.Source, Content = l.Content,
                 GameDate = l.GameDate.ToString("yyyy-MM-dd HH:mm:ss"),
                 CreateTime = l.CreateTime.ToString("MM-dd HH:mm:ss")
-            }).ToList<object>();
+            }).ToList();
         }
 
-        public (List<object> logs, int totalCount, int totalPages) GetLogsPaged(int page, int pageSize)
+        /// <summary>
+        /// 分页获取日志记录
+        /// </summary>
+        /// <param name="page">页码（从1开始）</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <returns>日志列表、总条数、总页数</returns>
+        public (List<GameLogVO> logs, int totalCount, int totalPages) GetLogsPaged(int page, int pageSize)
         {
             var totalCount = DBResponse.GetGameLogCount();
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             var logs = DBResponse.GetGameLogsPaged(page, pageSize);
-            var result = logs.Select(l => new
+            var result = logs.Select(l => new GameLogVO
             {
-                l.Id, l.Type, l.Source, l.Content,
+                Id = l.Id, Type = l.Type, Source = l.Source, Content = l.Content,
                 GameDate = l.GameDate.ToString("yyyy-MM-dd HH:mm:ss"),
                 CreateTime = l.CreateTime.ToString("MM-dd HH:mm:ss")
-            }).ToList<object>();
+            }).ToList();
             return (result, totalCount, totalPages);
         }
 
+        /// <summary>
+        /// 写入一条游戏日志
+        /// </summary>
+        /// <param name="source">日志来源</param>
+        /// <param name="content">日志内容</param>
+        /// <param name="type">日志类型（0=info, 1=success, 2=error）</param>
         private void AddLog(string source, string content, int type = 0)
         {
             DBResponse.AddGameLog(type, source, content, GameDate);
@@ -300,6 +373,12 @@ namespace LiveOn.Game
 
         #region 区块操作
 
+        /// <summary>
+        /// 对指定区块执行脚本操作（如种植、砍树、修剪等）
+        /// </summary>
+        /// <param name="blockId">区块ID</param>
+        /// <param name="scriptCode">脚本命令码</param>
+        /// <returns>操作是否成功及消息</returns>
         public (bool success, string message) ExecuteBlockScript(int blockId, int scriptCode)
         {
             var block = Grain.Instance.Blocks.FirstOrDefault(b => b.Id == blockId);
@@ -388,6 +467,10 @@ namespace LiveOn.Game
 
         private DateTime _lastSaveTime = DateTime.MinValue;
 
+        /// <summary>
+        /// 保存游戏状态到数据库，默认每5秒最多保存一次
+        /// </summary>
+        /// <param name="force">是否强制立即保存，忽略时间间隔限制</param>
         public void SaveGame(bool force = false)
         {
             var now = DateTime.Now;
@@ -405,6 +488,10 @@ namespace LiveOn.Game
             catch { }
         }
 
+        /// <summary>
+        /// 从数据库加载游戏存档
+        /// </summary>
+        /// <returns>是否加载成功</returns>
         public bool LoadGame()
         {
             try

@@ -1,7 +1,13 @@
 namespace LiveOn.Game.DB
 {
+    /// <summary>
+    /// SQLite 数据库脚本管理类，维护版本化的建表SQL脚本
+    /// </summary>
     public static class SQLiteDBScript
     {
+        /// <summary>
+        /// 数据库脚本字典，键为版本号，值为对应的SQL脚本
+        /// </summary>
         public static Dictionary<int, string> DBScript { get; set; } = new Dictionary<int, string>()
         {
             { 1, @"

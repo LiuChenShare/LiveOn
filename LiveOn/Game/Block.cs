@@ -4,6 +4,9 @@ using System.Drawing;
 
 namespace LiveOn.Game
 {
+    /// <summary>
+    /// 区块 — 游戏世界中的一个地块单元，可包含一个实体
+    /// </summary>
     public class Block
     {
         /// <summary>
@@ -18,6 +21,9 @@ namespace LiveOn.Game
 
         //public string Item { get; set; }
 
+        /// <summary>
+        /// 区块上的实体（如树木、种子等），为 null 表示区块空闲
+        /// </summary>
         public Entity Entity { get; set; }
 
 

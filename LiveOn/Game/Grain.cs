@@ -8,7 +8,13 @@ namespace LiveOn.Game
         #region 单例
         private static volatile Grain instance;
         private static object syncRoot = new Object();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public Grain() { }
+        /// <summary>
+        /// 世界容器单例实例
+        /// </summary>
         public static Grain Instance
         {
             get

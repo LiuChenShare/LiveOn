@@ -4,8 +4,14 @@ using System.Diagnostics;
 
 namespace LiveOn
 {
+    /// <summary>
+    /// Log4Net 日志辅助类，提供日志配置和写入功能
+    /// </summary>
     public class Log4NetHelper
     {
+        /// <summary>
+        /// Log4Net 日志仓储实例
+        /// </summary>
         private static ILoggerRepository _repository;
 
         /// <summary>

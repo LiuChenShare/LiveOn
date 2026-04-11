@@ -5,6 +5,9 @@ using System.Security.Claims;
 
 namespace LiveOn.Controllers
 {
+    /// <summary>
+    /// 首页控制器，处理登录和退出等基础功能
+    /// </summary>
     public class HomeController : Controller
     {
         /// <summary>

@@ -25,3 +25,30 @@
 - 枚举值用 `[Description("中文")]` 标注
 - 字段含义、枚举取值范围需在注释中说明
 - 前端 JS 函数、CSS 自定义样式块需有中文注释说明用途
+
+## 架构模式
+
+- 双单例：Grain（世界容器，持有 Blocks/Items 等数据）+ MainGame（事件总线 + 游戏时钟）
+- 数据与逻辑分离：MainGame 通过 `Grain.Instance` 读写数据，自身专注 Timer、事件分发、生命周期
+- ScriptComd int 枚举统一管理操作码，不用 string 常量
+
+## 认证方式
+
+- Cookie + Authorization header 双重传递
+- GlobalActionFilter 全局拦截，未认证返回 401 JSON
+- 前端 `ajaxError` 全局处理 401，跳转 `/login.html`
+
+## 前端技术栈
+
+- Bootstrap 5.1 + jQuery
+- 暗色森林主题，CSS 变量统一管理（`--bg-primary`、`--accent-green` 等，定义在 `site.css` :root 中）
+
+## 游戏时钟
+
+- System.Timers.Timer 1 秒驱动 Execute()
+- 级联事件：秒→分→时→日→月，触发前做 null 检查
+- 持久化策略：SaveGame 节流 5 秒，状态变更（开始/暂停/继续）用 `SaveGame(force: true)` 强制立即保存
+
+## Git 分支
+
+- `main` 稳定分支，`dev` 开发分支

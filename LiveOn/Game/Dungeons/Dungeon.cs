@@ -5,12 +5,34 @@
     /// </summary>
     public class Dungeon
     {
+        /// <summary>
+        /// 地下城唯一标识
+        /// </summary>
         public string Id {  get; set; }
+
+        /// <summary>
+        /// 地下城名称
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 地下城编码
+        /// </summary>
         public string Code { get; set; }
+
+        /// <summary>
+        /// 地下城等级
+        /// </summary>
         public int Level { get; set; }
 
+        /// <summary>
+        /// 创建时间
+        /// </summary>
         public DateTime CreateTime { get; set; }
+
+        /// <summary>
+        /// 关闭时间
+        /// </summary>
         public DateTime CloseTime { get; set; }
 
         /// <summary>

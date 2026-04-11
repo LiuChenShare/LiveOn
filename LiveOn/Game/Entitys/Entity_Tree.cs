@@ -3,16 +3,23 @@ using LiveOn.Game.Items;
 namespace LiveOn.Game.Entitys
 {
     /// <summary>
-    /// 树木实体专用
+    /// 树木实体专用逻辑
     /// </summary>
     public partial class Entity
     {
 
+        /// <summary>
+        /// 树木秒事件执行入口
+        /// </summary>
+        /// <param name="time">当前时间</param>
         public virtual async Task SecondsEventExecute_Tree(DateTime time)
         {
             Execute_SecondsEvent_Tree();
         }
 
+        /// <summary>
+        /// 树木秒事件具体执行逻辑，每小时按成长速率增长树高
+        /// </summary>
         public async Task Execute_SecondsEvent_Tree()
         {
             LifeTime.AddSeconds(1);
@@ -35,6 +42,10 @@ namespace LiveOn.Game.Entitys
             }
         }
 
+        /// <summary>
+        /// 获取树木可执行的操作列表（砍树、修剪）
+        /// </summary>
+        /// <returns>操作列表</returns>
         private List<ScriptItem> GetScript_Tree()
         {
             var result = new List<ScriptItem>();
@@ -57,6 +68,11 @@ namespace LiveOn.Game.Entitys
         }
 
 
+        /// <summary>
+        /// 执行树木指定的操作脚本（砍树或修剪）
+        /// </summary>
+        /// <param name="scriptCode">脚本编码</param>
+        /// <returns>执行成功返回 true</returns>
         private bool ExecuteScript_Tree(int scriptCode)
         {
             switch (scriptCode)

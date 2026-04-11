@@ -1,15 +1,36 @@
 ﻿using LiveOn.Core;
+using System.ComponentModel;
 
 namespace LiveOn.Game.Entitys
 {
+    /// <summary>
+    /// 实体基类，表示游戏中的各种可交互对象（树木、种子等）
+    /// </summary>
     public partial class Entity
     {
+        /// <summary>
+        /// 实体唯一标识
+        /// </summary>
         public string Id { get; internal set; }
+
+        /// <summary>
+        /// 实体名称
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 实体编码
+        /// </summary>
         public string Code { get; set; }
 
+        /// <summary>
+        /// 实体描述
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// 实体类型
+        /// </summary>
         public EntityType Type { get; set; }
 
         /// <summary>
@@ -52,9 +73,17 @@ namespace LiveOn.Game.Entitys
 
         #endregion
 
+        /// <summary>
+        /// 是否已删除
+        /// </summary>
         public bool IsDeleted { get; private set; }
 
 
+        /// <summary>
+        /// 根据编码初始化实体，加载模板数据并注册秒事件
+        /// </summary>
+        /// <param name="code">实体编码</param>
+        /// <returns>初始化成功返回 true，编码不存在返回 false</returns>
         public bool Init(string code)
         {
             var entityModel = VariableUtility.EntityModel.GetValueOrDefault(code);
@@ -82,6 +111,10 @@ namespace LiveOn.Game.Entitys
 
             return true;
         }
+        /// <summary>
+        /// 删除实体，标记为已删除并注销秒事件
+        /// </summary>
+        /// <returns>删除成功返回 true</returns>
         public bool Deleted()
         {
             IsDeleted = true;
@@ -124,6 +157,10 @@ namespace LiveOn.Game.Entitys
             }
         }
 
+        /// <summary>
+        /// 秒事件执行入口，根据实体类型分发到对应的秒事件处理方法
+        /// </summary>
+        /// <param name="time">当前时间</param>
         internal async Task SecondsEventExecute(DateTime time)
         {
             switch (Type)
@@ -137,15 +174,14 @@ namespace LiveOn.Game.Entitys
         }
     }
 
+    /// <summary>
+    /// 实体类型枚举
+    /// </summary>
     public enum EntityType
     {
-        /// <summary>
-        /// 树木
-        /// </summary>
+        [Description("树木")]
         Tree = 0,
-        /// <summary>
-        /// 种子
-        /// </summary>
+        [Description("种子")]
         Seed = 1,
     }
 }

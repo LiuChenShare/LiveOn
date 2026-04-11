@@ -8,14 +8,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LiveOn.Core
 {
+    /// <summary>
+    /// 全局 Action 过滤器，负责请求认证、Token 验证和接口耗时统计
+    /// </summary>
     public class GlobalActionFilter : ActionFilterAttribute
     {
+        /// <summary>
+        /// 计时器，用于统计请求执行耗时
+        /// </summary>
         private readonly Stopwatch Timmer = new Stopwatch();
 
+        /// <summary>
+        /// 日志记录器
+        /// </summary>
         public static ILogger _logger;
 
 
 
+        /// <summary>
+        /// Action 执行前拦截，进行 Token 认证和权限验证
+        /// </summary>
+        /// <param name="context">Action 执行上下文</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
 
@@ -88,6 +101,10 @@ namespace LiveOn.Core
             base.OnActionExecuting(context);
 
         }
+        /// <summary>
+        /// Action 执行后拦截，停止计时并记录请求耗时
+        /// </summary>
+        /// <param name="context">Action 已执行上下文</param>
         public override void OnActionExecuted(ActionExecutedContext context)
         {
             Timmer.Stop();

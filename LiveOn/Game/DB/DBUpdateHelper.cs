@@ -4,10 +4,13 @@ using System.Reflection;
 
 namespace LiveOn.Game.DB
 {
+    /// <summary>
+    /// 数据库版本更新辅助类，负责数据库版本检查和迁移
+    /// </summary>
     public static class DBUpdateHelper
     {
         /// <summary>
-        /// 检查并更新数据库
+        /// 检查并更新数据库，创建连接后执行版本迁移
         /// </summary>
         public static void DbVersionCheck()
         {
@@ -17,8 +20,9 @@ namespace LiveOn.Game.DB
         }
 
         /// <summary>
-        /// 执行版本迁移
+        /// 执行版本迁移，从当前版本逐步执行所有未执行的SQL脚本
         /// </summary>
+        /// <param name="conn">数据库连接</param>
         public static void DBUpdate(IDbConnection conn)
         {
             int maxVersion = SQLiteDBScript.DBScript.Keys.Max();
@@ -45,14 +49,25 @@ namespace LiveOn.Game.DB
         }
 
         /// <summary>
-        /// 查询并映射为实体列表
+        /// 执行SQL查询并将结果映射为实体列表
         /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="connection">数据库连接</param>
+        /// <param name="sql">SQL查询语句</param>
+        /// <param name="param">查询参数</param>
+        /// <returns>实体列表</returns>
         public static List<T> GetModelFromSql<T>(this IDbConnection connection, string sql, object param = null)
         {
             var dataTable = connection.QueryToDataTable(sql, param);
             return GetModelFromDB<T>(dataTable);
         }
 
+        /// <summary>
+        /// 将 DataTable 转换为实体列表
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="dt">数据表</param>
+        /// <returns>实体列表</returns>
         private static List<T> GetModelFromDB<T>(DataTable dt)
         {
             var data = new List<T>();
@@ -63,6 +78,12 @@ namespace LiveOn.Game.DB
             return data;
         }
 
+        /// <summary>
+        /// 将单行数据映射为实体对象，通过反射根据列名匹配属性
+        /// </summary>
+        /// <typeparam name="T">实体类型</typeparam>
+        /// <param name="dr">数据行</param>
+        /// <returns>实体对象</returns>
         private static T GetItem<T>(DataRow dr)
         {
             Type temp = typeof(T);
@@ -120,6 +141,13 @@ namespace LiveOn.Game.DB
             return obj;
         }
 
+        /// <summary>
+        /// 执行SQL查询并将结果转换为 DataTable
+        /// </summary>
+        /// <param name="connection">数据库连接</param>
+        /// <param name="sql">SQL查询语句</param>
+        /// <param name="param">查询参数</param>
+        /// <returns>查询结果数据表</returns>
         public static DataTable QueryToDataTable(this IDbConnection connection, string sql, object param = null)
         {
             using var reader = connection.ExecuteReader(sql, param);

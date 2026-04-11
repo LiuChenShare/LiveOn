@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LiveOn.Controllers
 {
+    /// <summary>
+    /// 游戏控制器，处理游戏相关的所有 API 请求
+    /// </summary>
     public class GameController : Controller
     {
         /// <summary>

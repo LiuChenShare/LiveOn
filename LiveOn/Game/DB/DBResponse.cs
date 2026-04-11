@@ -3,10 +3,17 @@ using LiveOn.Game.DB;
 
 namespace LiveOn.Game
 {
+    /// <summary>
+    /// 数据库响应工具类，提供所有实体的增删改查静态方法
+    /// </summary>
     public static class DBResponse
     {
         #region MainGame
 
+        /// <summary>
+        /// 获取主游戏存档数据
+        /// </summary>
+        /// <returns>主游戏数据模型，查询失败返回 null</returns>
         public static DBModels.DbMainGame? GetMainGame()
         {
             var dBContext = new SQLiteDBContext();
@@ -18,6 +25,13 @@ namespace LiveOn.Game
             catch { return null; }
         }
 
+        /// <summary>
+        /// 保存主游戏存档数据，存在则更新，不存在则插入
+        /// </summary>
+        /// <param name="gameState">游戏状态</param>
+        /// <param name="gameDate">游戏内日期</param>
+        /// <param name="maxBlockCount">最大地块数量</param>
+        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveMainGame(int gameState, DateTime gameDate, int maxBlockCount)
         {
             var dBContext = new SQLiteDBContext();
@@ -44,6 +58,10 @@ namespace LiveOn.Game
 
         #region Block
 
+        /// <summary>
+        /// 获取所有地块数据
+        /// </summary>
+        /// <returns>地块数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbBlock> GetAllBlocks()
         {
             var dBContext = new SQLiteDBContext();
@@ -55,6 +73,11 @@ namespace LiveOn.Game
             catch { return new List<DBModels.DbBlock>(); }
         }
 
+        /// <summary>
+        /// 批量保存地块数据，存在则更新，不存在则插入
+        /// </summary>
+        /// <param name="blocks">地块列表</param>
+        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveBlocks(List<Block> blocks)
         {
             var dBContext = new SQLiteDBContext();
@@ -86,6 +109,10 @@ namespace LiveOn.Game
 
         #region Entity
 
+        /// <summary>
+        /// 获取所有实体数据
+        /// </summary>
+        /// <returns>实体数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbEntity> GetAllEntitys()
         {
             var dBContext = new SQLiteDBContext();
@@ -97,6 +124,11 @@ namespace LiveOn.Game
             catch { return new List<DBModels.DbEntity>(); }
         }
 
+        /// <summary>
+        /// 批量保存实体数据，存在则更新，不存在则插入
+        /// </summary>
+        /// <param name="entitys">实体列表</param>
+        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveEntitys(List<Entitys.Entity> entitys)
         {
             var dBContext = new SQLiteDBContext();
@@ -146,6 +178,10 @@ namespace LiveOn.Game
 
         #region Item
 
+        /// <summary>
+        /// 获取所有物品数据
+        /// </summary>
+        /// <returns>物品数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbItem> GetAllItems()
         {
             var dBContext = new SQLiteDBContext();
@@ -157,6 +193,11 @@ namespace LiveOn.Game
             catch { return new List<DBModels.DbItem>(); }
         }
 
+        /// <summary>
+        /// 批量保存物品数据，存在则更新，不存在则插入
+        /// </summary>
+        /// <param name="items">物品列表</param>
+        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveItems(List<Items.Item> items)
         {
             var dBContext = new SQLiteDBContext();
@@ -196,6 +237,13 @@ namespace LiveOn.Game
 
         #region GameLog
 
+        /// <summary>
+        /// 添加一条游戏日志
+        /// </summary>
+        /// <param name="type">日志类型</param>
+        /// <param name="source">日志来源</param>
+        /// <param name="content">日志内容</param>
+        /// <param name="gameDate">游戏内日期</param>
         public static void AddGameLog(int type, string source, string content, DateTime gameDate)
         {
             var dBContext = new SQLiteDBContext();
@@ -217,6 +265,11 @@ namespace LiveOn.Game
             catch { }
         }
 
+        /// <summary>
+        /// 获取最近指定数量的游戏日志
+        /// </summary>
+        /// <param name="count">获取数量</param>
+        /// <returns>游戏日志列表，查询失败返回空列表</returns>
         public static List<DBModels.DbGameLog> GetGameLogs(int count)
         {
             var dBContext = new SQLiteDBContext();
@@ -230,6 +283,12 @@ namespace LiveOn.Game
             catch { return new List<DBModels.DbGameLog>(); }
         }
 
+        /// <summary>
+        /// 分页获取游戏日志
+        /// </summary>
+        /// <param name="page">页码（从1开始）</param>
+        /// <param name="pageSize">每页数量</param>
+        /// <returns>游戏日志列表，查询失败返回空列表</returns>
         public static List<DBModels.DbGameLog> GetGameLogsPaged(int page, int pageSize)
         {
             var dBContext = new SQLiteDBContext();
@@ -244,6 +303,10 @@ namespace LiveOn.Game
             catch { return new List<DBModels.DbGameLog>(); }
         }
 
+        /// <summary>
+        /// 获取游戏日志总数
+        /// </summary>
+        /// <returns>日志总数，查询失败返回 0</returns>
         public static int GetGameLogCount()
         {
             var dBContext = new SQLiteDBContext();

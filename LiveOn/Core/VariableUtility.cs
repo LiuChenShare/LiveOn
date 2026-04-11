@@ -5,12 +5,20 @@ using log4net.Core;
 
 namespace LiveOn.Core
 {
+    /// <summary>
+    /// 全局变量工具类，存储活跃的 API 密钥、实体模型、物品模型和地下城数据
+    /// </summary>
     public class VariableUtility
     {
-        //1.账号  2.userid  3.apiKey  4.上一次使用apiKey时间
+        /// <summary>
+        /// 活跃的 API 密钥字典，Key 为 apiKey，Value 为元组（账号、用户ID、apiKey、上次使用时间）
+        /// </summary>
         public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>> ActiveApiKeys = new System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>>();
 
         #region  实体
+        /// <summary>
+        /// 实体模型字典，Key 为编码，Value 为实体定义
+        /// </summary>
         public static Dictionary<string, Entity> EntityModel = new Dictionary<string, Entity>
             {
                 { "0", new Entity() { Code = "0",Type = EntityType.Tree,Name = "杂树", Description="这是一颗不知名的树木。", Tree_High = 0.3, Tree_GrowthRate = 0.3} },
@@ -19,6 +27,9 @@ namespace LiveOn.Core
         #endregion
 
         #region  物品
+        /// <summary>
+        /// 物品模型字典，Key 为编码，Value 为物品定义
+        /// </summary>
         public static Dictionary<string, Item> ItemModel = new Dictionary<string, Item>
             {
                 { "1", new Item() { Code = "1", Name = "树枝" } },
@@ -27,6 +38,9 @@ namespace LiveOn.Core
         #endregion
 
         #region 地下城
+        /// <summary>
+        /// 地下城字典，Key 为编码，Value 为地下城定义
+        /// </summary>
         public static Dictionary<string, Dungeon> Dungeon = new Dictionary<string, Dungeon>
         {
             { "1", new Dungeon() { Code = "1", Name = "初始地下城",Level = 1, 

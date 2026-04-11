@@ -45,6 +45,7 @@ function refreshGameState() {
     });
 }
 
+/** 更新状态栏显示（游戏日期、状态徽标、按钮显隐） */
 function updateStatusBar(data) {
     $('#gameDate').text(data.gameDate);
     var $badge = $('#gameStateBadge');
@@ -100,6 +101,7 @@ function refreshBlocks() {
     });
 }
 
+/** 渲染区块网格，根据实体类型显示不同图标和信息 */
 function renderBlocks(blocks) {
     var $grid = $('#blockGrid');
     $grid.empty();
@@ -147,6 +149,7 @@ function refreshItems() {
     });
 }
 
+/** 渲染背包物品列表，显示物品名称和数量 */
 function renderItems(items) {
     var $list = $('#itemList');
     $list.empty();
@@ -260,12 +263,14 @@ function refreshLogs() {
     });
 }
 
+/** 转义日志文本中的 HTML 特殊字符，防止 XSS */
 function escapeLogHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
 }
 
+/** 数字补零，将个位数前补 '0' */
 function padZero(n) { return n < 10 ? '0' + n : '' + n; }
 
 // ===== Toast =====

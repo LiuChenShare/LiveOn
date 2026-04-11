@@ -1,25 +1,43 @@
 ﻿namespace LiveOn.Core
 {
+    /// <summary>
+    /// 当前登录用户上下文，使用 AsyncLocal 实现异步安全的用户信息存储
+    /// </summary>
     public class CurrentUser
     {   /// <summary>
         /// 当前用户ID
         /// </summary>
         private static AsyncLocal<int> currentUserId;
 
+        /// <summary>
+        /// 用户ID锁对象，用于双重检查锁定
+        /// </summary>
         private static Object currentUserIdLock = new object();
         /// <summary>
         /// 当前用户Seesion
         /// </summary>
         private static AsyncLocal<String> currentUserToken;
+        /// <summary>
+        /// Token锁对象，用于双重检查锁定
+        /// </summary>
         private static Object currentTokenLock = new object();
         /// <summary>
         /// 当前操作Seesion
         /// </summary>
         private static AsyncLocal<CommonUser> currentUser;
+        /// <summary>
+        /// 用户对象锁，用于双重检查锁定
+        /// </summary>
         private static Object currentUsersLock = new object();
 
 
+        /// <summary>
+        /// 当前用户IP地址
+        /// </summary>
         private static AsyncLocal<String> currentUserIP;
+        /// <summary>
+        /// 用户IP锁对象，用于双重检查锁定
+        /// </summary>
         private static Object currentUsersIPLock = new object();
         /// <summary>
         /// 获取请求的Token(非缓存)
@@ -141,6 +159,10 @@
 
 
 
+        /// <summary>
+        /// 获取请求用户的IP地址（非缓存）
+        /// </summary>
+        /// <returns>用户IP地址字符串，未设置时返回空字符串</returns>
         public static string GetLoadUserIP()
         {
             if (null != currentUserIP && currentUserIP.Value != string.Empty)

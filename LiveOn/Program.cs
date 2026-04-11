@@ -1,11 +1,19 @@
 using LiveOn.Core;
 using LiveOn.Game.DB;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Text.Json;
 
 namespace LiveOn
 {
+    /// <summary>
+    /// 应用程序入口类，负责配置和启动 Web 服务
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// 应用程序主入口，配置日志、服务注册、中间件管道和路由
+        /// </summary>
+        /// <param name="args">命令行参数</param>
         public static void Main(string[] args)
         {
             ////�����첽�¼�����
@@ -57,7 +65,8 @@ namespace LiveOn
 #endregion
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews()
+                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
 
             var app = builder.Build();
 
