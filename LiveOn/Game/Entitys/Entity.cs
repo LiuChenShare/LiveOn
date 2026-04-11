@@ -4,7 +4,7 @@ namespace LiveOn.Game.Entitys
 {
     public partial class Entity
     {
-        public string Id { get; private set; }
+        public string Id { get; internal set; }
         public string Name { get; set; }
         public string Code { get; set; }
 
@@ -111,7 +111,7 @@ namespace LiveOn.Game.Entitys
         /// </summary>
         /// <param name="scriptCode"></param>
         /// <returns></returns>
-        public bool ExecuteScript(string scriptCode)
+        public bool ExecuteScript(int scriptCode)
         {
             switch (Type)
             {
@@ -124,7 +124,7 @@ namespace LiveOn.Game.Entitys
             }
         }
 
-        private async Task SecondsEventExecute(DateTime time)
+        internal async Task SecondsEventExecute(DateTime time)
         {
             switch (Type)
             {

@@ -1,4 +1,5 @@
 using LiveOn.Core;
+using LiveOn.Game.DB;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace LiveOn
@@ -7,20 +8,20 @@ namespace LiveOn
     {
         public static void Main(string[] args)
         {
-            ////²âÊÔÒì²½ÊÂ¼þµ÷ÓÃ
+            ////ï¿½ï¿½ï¿½ï¿½ï¿½ì²½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½
             //EvTest eventTest = new EvTest();
             //eventTest.XXX();
 
             var builder = WebApplication.CreateBuilder(args);
 
-            //Ìí¼ÓÈÕÖ¾
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
             builder.Host.ConfigureLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.AddConsole();
 
-                //ÅäÖÃLog4net(¶ÁÈ¡ÅäÖÃÎÄ¼þ)
-                //»áÌæ»»µôÄÚÖÃÈÕÖ¾
+                //ï¿½ï¿½ï¿½ï¿½Log4net(ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½)
+                //ï¿½ï¿½ï¿½æ»»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
                 logging.AddLog4Net("log4net.config");
             });
 
@@ -41,11 +42,11 @@ namespace LiveOn
                 });
             });
 
-            #region ½Ó¿ÚÐÐ¶¯¹ýÂËÆ÷
+            #region ï¿½Ó¿ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             // Add services to the container.
-            //builder.Services.AddSingleton<IActionFilter>(new GlobalActionFilter()); // ³õÊ¼»¯ LoggerMonitor
-            //builder.Services.AddSingleton<IActionFilter>(new GlobalActionFilter()); // ³õÊ¼»¯ LoggerError
-            //builder.Services.AddScoped<GlobalActionFilter>(); // ×¢²á ActionFilter
+            //builder.Services.AddSingleton<IActionFilter>(new GlobalActionFilter()); // ï¿½ï¿½Ê¼ï¿½ï¿½ LoggerMonitor
+            //builder.Services.AddSingleton<IActionFilter>(new GlobalActionFilter()); // ï¿½ï¿½Ê¼ï¿½ï¿½ LoggerError
+            //builder.Services.AddScoped<GlobalActionFilter>(); // ×¢ï¿½ï¿½ ActionFilter
 
             //builder.Services.AddControllers(options => {
             //    options.Filters.Add(new GlobalActionFilter());
@@ -60,6 +61,9 @@ namespace LiveOn
 
             var app = builder.Build();
 
+            // åˆå§‹åŒ–æ•°æ®åº“
+            DBUpdateHelper.DbVersionCheck();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -73,8 +77,10 @@ namespace LiveOn
 
             app.MapControllerRoute(
                 name: "default",
-                //pattern: "{controller=Home}/{action=Index}/{id?}");
-                pattern: "{controller=Home}/{action=Login}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // é»˜è®¤é¦–é¡µé‡å®šå‘åˆ° login.html
+            app.MapGet("/", () => Results.Redirect("/login.html"));
 
             app.Run();
         }

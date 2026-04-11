@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - LiveOn</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-logo">
+                <svg viewBox="0 0 48 48" width="56" height="56">
+                    <path d="M24 4C16 4 10 10 10 18c0 5 2.5 9.5 7 12.5V38h14v-7.5c4.5-3 7-7.5 7-12.5C38 10 32 4 24 4z" fill="none" stroke="#5fa34a" stroke-width="2.5"/>
+                    <path d="M14 38h20v4H14zM17 30c0 0 3.5 2 7 2s7-2 7-2" fill="none" stroke="#5fa34a" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="20" cy="18" r="2" fill="#5fa34a"/>
+                    <circle cx="28" cy="18" r="2" fill="#5fa34a"/>
+                </svg>
+            </div>
+            <h2 class="login-title">LiveOn</h2>
+            <p class="login-subtitle">生存，从现在开始</p>
+            <form id="loginForm">
+                <div class="login-field">
+                    <label for="userName" class="login-label">账号</label>
+                    <input type="text" class="login-input" id="userName" name="userName" placeholder="请输入账号" autocomplete="off" required>
+                </div>
+                <div class="login-field">
+                    <label for="passWord" class="login-label">密码</label>
+                    <input type="password" class="login-input" id="passWord" name="passWord" placeholder="请输入密码" required>
+                </div>
+                <div id="loginError" style="color:var(--accent-red);font-size:0.85rem;margin-bottom:12px;display:none;"></div>
+                <button type="submit" class="login-btn">
+                    <span>进入世界</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+    .login-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .login-card {
+        width: 100%;
+        max-width: 360px;
+        padding: 48px 36px 36px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    .login-logo { margin-bottom: 12px; }
+    .login-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent-green);
+        margin: 0 0 4px 0;
+        letter-spacing: 2px;
+    }
+    .login-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0 0 32px 0;
+    }
+    .login-field {
+        position: relative;
+        margin-bottom: 28px;
+        text-align: left;
+    }
+    .login-label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+    .login-input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box;
+    }
+    .login-input:focus {
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 2px rgba(95, 163, 74, 0.15);
+    }
+    .login-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent-green);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    .login-btn:hover {
+        background: #4e8a3c;
+        box-shadow: 0 4px 16px rgba(95, 163, 74, 0.3);
+        transform: translateY(-1px);
+    }
+    .login-btn:active { transform: translateY(0); }
+    </style>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+    $('#loginForm').on('submit', function (e) {
+        e.preventDefault();
+        $.post('/Home/Login', {
+            userName: $('#userName').val(),
+            passWord: $('#passWord').val()
+        }, function () {
+            window.location.href = '/game.html';
+        }).fail(function () {
+            $('#loginError').text('账号或密码错误').show();
+        });
+    });
+    </script>
+</body>
+</html>

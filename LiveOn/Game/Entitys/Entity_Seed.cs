@@ -45,7 +45,7 @@ namespace LiveOn.Game.Entitys
         }
 
 
-        private bool ExecuteScript_Seed(string scriptCode)
+        private bool ExecuteScript_Seed(int scriptCode)
         {
             switch (scriptCode)
             {

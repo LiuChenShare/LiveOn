@@ -34,7 +34,7 @@ namespace LiveOn.Game
                 ScriptItem script_KanShu = new ScriptItem
                 {
                     Name = "种植",
-                    ScriptCode = VariableUtility.Script_ZhongZhi,
+                    ScriptCode = (int)ScriptComd.ZhongZhi,
                     Description = "种点什么"
                 };
                 result.Add(script_KanShu);

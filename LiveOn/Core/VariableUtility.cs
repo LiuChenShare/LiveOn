@@ -10,23 +10,6 @@ namespace LiveOn.Core
         //1.账号  2.userid  3.apiKey  4.上一次使用apiKey时间
         public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>> ActiveApiKeys = new System.Collections.Concurrent.ConcurrentDictionary<string, Tuple<string, int, string, DateTime>>();
 
-        #region 操作
-
-        /// <summary>
-        /// 树-砍树
-        /// </summary>
-        public const string Script_Tree_KanShu = "Script_Tree_KanShu";
-        /// <summary>
-        /// 树-修剪
-        /// </summary>
-        public const string Script_Tree_XiuJian = "Script_Tree_XiuJian";
-
-        /// <summary>
-        /// 种植
-        /// </summary>
-        public const string Script_ZhongZhi = "Script_ZhongZhi";
-        #endregion
-
         #region  实体
         public static Dictionary<string, Entity> EntityModel = new Dictionary<string, Entity>
             {

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>操作日志 - LiveOn</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <style>
+    .log-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 0;
+    }
+    .log-page-header h5 { margin: 0; color: var(--text-primary); }
+    .log-table { width: 100%; border-collapse: collapse; }
+    .log-table th {
+        padding: 10px 16px;
+        text-align: left;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .log-table td {
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(58, 69, 48, 0.4);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+    .log-table tr:hover td { background: var(--bg-tertiary); }
+    .log-type-info { color: var(--text-secondary); }
+    .log-type-success { color: var(--accent-green); }
+    .log-type-warning { color: var(--accent-amber); }
+    .log-type-error { color: var(--accent-red); }
+    .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 16px;
+    }
+    .pagination-bar button {
+        padding: 6px 12px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .pagination-bar button:hover:not(:disabled) {
+        background: var(--block-hover);
+        border-color: var(--accent-green);
+    }
+    .pagination-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination-bar button.active {
+        background: var(--accent-green);
+        border-color: var(--accent-green);
+        color: #fff;
+    }
+    .pagination-bar .page-info { color: var(--text-secondary); font-size: 0.85rem; margin: 0 8px; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark" style="background-color: #1e2718;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/game.html">LiveOn</a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/game.html">生存面板</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Logout">退出</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid px-3 py-2 flex-grow-1">
+        <main role="main">
+            <div class="container-fluid" style="padding-top: 20px;">
+                <div class="game-panel">
+                    <div class="log-page-header">
+                        <h5>操作日志</h5>
+                        <a href="/game.html" class="btn btn-sm btn-outline-light">返回游戏</a>
+                    </div>
+                    <div class="panel-body">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">时间</th>
+                                    <th style="width: 80px;">来源</th>
+                                    <th>内容</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination-bar" id="paginationBar"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        var currentPage = 1;
+        var pageSize = 50;
+
+        function loadLogs(page) {
+            currentPage = page;
+            $.get('/Game/GetLogsPaged', { page: page, pageSize: pageSize }, function (data) {
+                renderTable(data.logs);
+                renderPagination(data.page, data.totalPages, data.totalCount);
+            });
+        }
+
+        function renderTable(logs) {
+            var $body = $('#logTableBody');
+            if (!logs || logs.length === 0) {
+                $body.html('<tr><td colspan="3" style="text-align:center;color:var(--text-dim);">暂无日志</td></tr>');
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < logs.length; i++) {
+                var l = logs[i];
+                var typeClass = l.type === 1 ? 'log-type-success' : l.type === 2 ? 'log-type-error' : l.type === 3 ? 'log-type-warning' : 'log-type-info';
+                html += '<tr>';
+                html += '<td class="log-type-info">' + escapeHtml(l.createTime) + '</td>';
+                html += '<td>' + escapeHtml(l.source) + '</td>';
+                html += '<td class="' + typeClass + '">' + escapeHtml(l.content) + '</td>';
+                html += '</tr>';
+            }
+            $body.html(html);
+        }
+
+        function renderPagination(page, total, count) {
+            var $bar = $('#paginationBar');
+            if (total <= 1) { $bar.html('<span class="page-info">共 ' + count + ' 条</span>'); return; }
+            var html = '<button ' + (page <= 1 ? 'disabled' : '') + ' onclick="loadLogs(' + (page - 1) + ')">上一页</button>';
+            var start = Math.max(1, page - 2);
+            var end = Math.min(total, page + 2);
+            if (start > 1) html += '<button onclick="loadLogs(1)">1</button>';
+            if (start > 2) html += '<span class="page-info">...</span>';
+            for (var i = start; i <= end; i++) {
+                html += '<button class="' + (i === page ? 'active' : '') + '" onclick="loadLogs(' + i + ')">' + i + '</button>';
+            }
+            if (end < total - 1) html += '<span class="page-info">...</span>';
+            if (end < total) html += '<button onclick="loadLogs(' + total + ')">' + total + '</button>';
+            html += '<button ' + (page >= total ? 'disabled' : '') + ' onclick="loadLogs(' + (page + 1) + ')">下一页</button>';
+            html += '<span class="page-info">共 ' + count + ' 条</span>';
+            $bar.html(html);
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        loadLogs(1);
+    </script>
+</body>
+</html>

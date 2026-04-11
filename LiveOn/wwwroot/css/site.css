@@ -1,22 +1,355 @@
+/* ===== 生存游戏主题 ===== */
+:root {
+    --bg-primary: #1a1f16;
+    --bg-secondary: #2a3024;
+    --bg-tertiary: #232b1f;
+    --text-primary: #c8d5b9;
+    --text-secondary: #8a9a7a;
+    --text-dim: #5a6a4a;
+    --accent-green: #5fa34a;
+    --accent-amber: #c49a3c;
+    --accent-red: #8b3a3a;
+    --border-color: #3a4530;
+    --block-idle: #232b1f;
+    --block-active: #2d3a28;
+    --block-hover: #3d5a30;
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    margin-bottom: 0 !important;
 }
+
+a { color: var(--accent-green); }
+a:hover { color: #7bc366; }
+
+/* ===== 游戏状态栏 ===== */
+.game-status-bar {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.game-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    letter-spacing: 1px;
+}
+
+.game-time {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.badge.bg-game-status {
+    background-color: var(--accent-green);
+    font-weight: normal;
+}
+
+.badge.bg-game-status.paused {
+    background-color: var(--accent-amber);
+}
+
+.badge.bg-game-status.init {
+    background-color: var(--text-dim);
+}
+
+/* ===== 按钮 ===== */
+.btn-game-start {
+    background-color: var(--accent-green);
+    color: #fff;
+    border: none;
+    font-size: 0.85rem;
+    padding: 0.35rem 1rem;
+    border-radius: 4px;
+}
+.btn-game-start:hover { background-color: #4e9339; color: #fff; }
+
+.btn-game-pause {
+    background-color: var(--accent-amber);
+    color: #fff;
+    border: none;
+    font-size: 0.85rem;
+    padding: 0.35rem 1rem;
+    border-radius: 4px;
+}
+.btn-game-pause:hover { background-color: #b08530; color: #fff; }
+
+.btn-game-resume {
+    background-color: var(--accent-green);
+    color: #fff;
+    border: none;
+    font-size: 0.85rem;
+    padding: 0.35rem 1rem;
+    border-radius: 4px;
+}
+.btn-game-resume:hover { background-color: #4e9339; color: #fff; }
+
+/* ===== 面板 ===== */
+.game-panel {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 6px 6px 0 0;
+}
+
+.panel-header h6 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.panel-body {
+    padding: 0.6rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ===== 区块网格 ===== */
+.block-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.block-card {
+    background-color: var(--block-idle);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.block-card:hover {
+    background-color: var(--block-hover);
+    border-color: var(--accent-green);
+    transform: translateY(-1px);
+}
+
+.block-card.has-entity {
+    background-color: var(--block-active);
+    border-left: 3px solid var(--accent-green);
+}
+
+.block-card-id {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.block-card-icon {
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 0.2rem 0;
+}
+
+.block-card-icon.tree { color: var(--accent-green); }
+.block-card-icon.seed { color: var(--accent-amber); }
+.block-card-icon.empty { color: var(--text-dim); }
+
+.block-card-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.block-card-info {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ===== 物品列表 ===== */
+.item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.item-name { color: var(--text-primary); }
+.item-count {
+    color: var(--accent-green);
+    font-weight: 700;
+    min-width: 30px;
+    text-align: right;
+}
+
+/* ===== 操作日志 ===== */
+.log-container {
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 0.8rem;
+}
+
+.log-entry {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(58,69,48,0.5);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.log-time {
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+}
+
+.log-msg { color: var(--text-secondary); }
+.log-msg.success { color: var(--accent-green); }
+.log-msg.warning { color: var(--accent-amber); }
+.log-msg.error { color: var(--accent-red); }
+
+/* ===== 模态框 ===== */
+.game-modal {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.game-modal .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+.game-modal .btn-close-white { opacity: 0.7; }
+
+.block-detail-entity {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.block-detail-entity .entity-icon {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+
+.block-detail-entity .entity-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-green);
+}
+
+.block-detail-entity .entity-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.block-detail-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin: 0.8rem 0;
+}
+
+.stat-item {
+    background-color: var(--bg-tertiary);
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.stat-label { color: var(--text-dim); }
+.stat-value { color: var(--text-primary); font-weight: 600; }
+
+.script-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+}
+
+.script-btn {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: var(--block-active);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+}
+
+.script-btn:hover {
+    background-color: var(--block-hover);
+    border-color: var(--accent-green);
+    color: #fff;
+}
+
+.script-btn .script-name { font-weight: 600; }
+.script-btn .script-desc { font-size: 0.75rem; color: var(--text-secondary); }
+
+/* ===== 滚动条 ===== */
+.panel-body::-webkit-scrollbar,
+.log-container::-webkit-scrollbar {
+    width: 4px;
+}
+.panel-body::-webkit-scrollbar-track,
+.log-container::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+.panel-body::-webkit-scrollbar-thumb,
+.log-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+/* ===== Toast 提示 ===== */
+.game-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 250px;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.85rem;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.3s ease;
+}
+.game-toast.show { opacity: 1; transform: translateX(0); }
+.game-toast.success { background-color: var(--accent-green); }
+.game-toast.error { background-color: var(--accent-red); }
+.game-toast.warning { background-color: var(--accent-amber); }

@@ -74,21 +74,14 @@ namespace LiveOn.Core
                             CurrentUser.SetLoadUserId(VariableUtility.ActiveApiKeys[apiKey].Item2);
                             CurrentUser.SetLoadUser(user);
 
-                            //base.OnActionExecuting(context);
+                            return; // 认证成功，继续执行Action
                         }
                     }
                 }
 
-
+                // 未认证，返回 401
                 context.HttpContext.Response.StatusCode = 401;
-                context.Result = new ObjectResult(new { status = 401, data = "权限异常" });
-
-                // 指定重定向的页面
-                context.Result = new RedirectToRouteResult(new RouteValueDictionary {
-                    { "controller", "Home" },
-                    { "action", "Login" }
-                });
-                //context.RedirectToAction("Index", "Home");
+                context.Result = new ObjectResult(new { status = 401, message = "未登录" });
 
                 return;
             }
