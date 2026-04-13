@@ -36,26 +36,13 @@ namespace LiveOn.Game.Items
         public bool IsDeleted { get; private set; }
 
         /// <summary>
-        /// 物品注册表，Key 为编码，Value 为模板定义
-        /// </summary>
-        private static readonly Dictionary<string, Item> _registry = new();
-
-        /// <summary>
-        /// 注册物品模板（在 VariableUtility 中调用）
-        /// </summary>
-        public static void RegisterTemplate(string code, Item template)
-        {
-            _registry[code] = template;
-        }
-
-        /// <summary>
         /// 根据编码创建物品实例并初始化
         /// </summary>
         /// <param name="code">物品编码</param>
         /// <returns>创建成功返回实例，编码不存在返回 null</returns>
         public static Item Create(string code)
         {
-            var template = _registry.GetValueOrDefault(code);
+            var template = Core.VariableUtility.ItemModel.GetValueOrDefault(code);
             if (template == null) return null;
 
             return new Item
