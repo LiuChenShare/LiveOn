@@ -60,8 +60,6 @@ namespace LiveOn
             //    options.Filters.Add(new GlobalActionFilter());
             //});
 
-            var serviceProvider = builder.Services.BuildServiceProvider();
-            GlobalActionFilter._logger = serviceProvider.GetRequiredService<ILogger<GlobalActionFilter>>();
 #endregion
 
             // Add services to the container.

@@ -1,5 +1,6 @@
 using LiveOn.Game.Items;
 using System.Text.Json;
+using log4net;
 
 namespace LiveOn.Game.Entitys
 {
@@ -8,6 +9,8 @@ namespace LiveOn.Game.Entitys
     /// </summary>
     public class TreeEntity : Entity
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(TreeEntity));
+
         static TreeEntity()
         {
             Register<TreeEntity>("0");
@@ -142,7 +145,10 @@ namespace LiveOn.Game.Entitys
                 if (doc.RootElement.TryGetProperty("tree_high", out var h)) TreeHigh = h.GetDouble();
                 if (doc.RootElement.TryGetProperty("growth_rate", out var r)) GrowthRate = r.GetDouble();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Error($"反序列化树木属性失败: {json}", ex);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using Dapper;
 using LiveOn.Game.DB;
+using log4net;
 
 namespace LiveOn.Game
 {
@@ -8,6 +9,11 @@ namespace LiveOn.Game
     /// </summary>
     public static class DBResponse
     {
+        /// <summary>
+        /// Log4Net 日志实例
+        /// </summary>
+        private static readonly ILog Log = LogManager.GetLogger(typeof(DBResponse));
+
         #region MainGame
 
         /// <summary>
@@ -22,16 +28,16 @@ namespace LiveOn.Game
             {
                 return conn.GetModelFromSql<DBModels.DbMainGame>("SELECT * FROM MainGame;").FirstOrDefault();
             }
-            catch { return null; }
+            catch (Exception ex)
+            {
+                Log.Error("查询主游戏存档失败", ex);
+                return null;
+            }
         }
 
         /// <summary>
         /// 保存主游戏存档数据，存在则更新，不存在则插入
         /// </summary>
-        /// <param name="gameState">游戏状态</param>
-        /// <param name="gameDate">游戏内日期</param>
-        /// <param name="maxBlockCount">最大地块数量</param>
-        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveMainGame(int gameState, DateTime gameDate, int maxBlockCount)
         {
             var dBContext = new SQLiteDBContext();
@@ -51,7 +57,11 @@ namespace LiveOn.Game
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Log.Error("保存主游戏存档失败", ex);
+                return false;
+            }
         }
 
         #endregion
@@ -61,7 +71,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取所有地块数据
         /// </summary>
-        /// <returns>地块数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbBlock> GetAllBlocks()
         {
             var dBContext = new SQLiteDBContext();
@@ -70,14 +79,16 @@ namespace LiveOn.Game
             {
                 return conn.GetModelFromSql<DBModels.DbBlock>("SELECT * FROM Block;");
             }
-            catch { return new List<DBModels.DbBlock>(); }
+            catch (Exception ex)
+            {
+                Log.Error("查询所有地块失败", ex);
+                return new List<DBModels.DbBlock>();
+            }
         }
 
         /// <summary>
-        /// 批量保存地块数据，存在则更新，不存在则插入
+        /// 批量保存地块数据
         /// </summary>
-        /// <param name="blocks">地块列表</param>
-        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveBlocks(List<Block> blocks)
         {
             var dBContext = new SQLiteDBContext();
@@ -102,7 +113,11 @@ namespace LiveOn.Game
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Log.Error("保存地块数据失败", ex);
+                return false;
+            }
         }
 
         #endregion
@@ -112,7 +127,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取所有实体数据
         /// </summary>
-        /// <returns>实体数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbEntity> GetAllEntitys()
         {
             var dBContext = new SQLiteDBContext();
@@ -121,14 +135,16 @@ namespace LiveOn.Game
             {
                 return conn.GetModelFromSql<DBModels.DbEntity>("SELECT * FROM Entity;");
             }
-            catch { return new List<DBModels.DbEntity>(); }
+            catch (Exception ex)
+            {
+                Log.Error("查询所有实体失败", ex);
+                return new List<DBModels.DbEntity>();
+            }
         }
 
         /// <summary>
-        /// 批量保存实体数据，存在则更新，不存在则插入
+        /// 批量保存实体数据
         /// </summary>
-        /// <param name="entitys">实体列表</param>
-        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveEntitys(List<Entitys.Entity> entitys)
         {
             var dBContext = new SQLiteDBContext();
@@ -170,7 +186,11 @@ namespace LiveOn.Game
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Log.Error("保存实体数据失败", ex);
+                return false;
+            }
         }
 
         #endregion
@@ -180,7 +200,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 获取所有物品数据
         /// </summary>
-        /// <returns>物品数据列表，查询失败返回空列表</returns>
         public static List<DBModels.DbItem> GetAllItems()
         {
             var dBContext = new SQLiteDBContext();
@@ -189,14 +208,16 @@ namespace LiveOn.Game
             {
                 return conn.GetModelFromSql<DBModels.DbItem>("SELECT * FROM Item;");
             }
-            catch { return new List<DBModels.DbItem>(); }
+            catch (Exception ex)
+            {
+                Log.Error("查询所有物品失败", ex);
+                return new List<DBModels.DbItem>();
+            }
         }
 
         /// <summary>
-        /// 批量保存物品数据，存在则更新，不存在则插入
+        /// 批量保存物品数据
         /// </summary>
-        /// <param name="items">物品列表</param>
-        /// <returns>保存成功返回 true，失败返回 false</returns>
         public static bool SaveItems(List<Items.Item> items)
         {
             var dBContext = new SQLiteDBContext();
@@ -229,7 +250,11 @@ namespace LiveOn.Game
                 }
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Log.Error("保存物品数据失败", ex);
+                return false;
+            }
         }
 
         #endregion
@@ -239,10 +264,6 @@ namespace LiveOn.Game
         /// <summary>
         /// 添加一条游戏日志
         /// </summary>
-        /// <param name="type">日志类型</param>
-        /// <param name="source">日志来源</param>
-        /// <param name="content">日志内容</param>
-        /// <param name="gameDate">游戏内日期</param>
         public static void AddGameLog(int type, string source, string content, DateTime gameDate)
         {
             var dBContext = new SQLiteDBContext();
@@ -261,14 +282,15 @@ namespace LiveOn.Game
                         CreateTime = DateTime.Now
                     });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Error("写入游戏日志失败", ex);
+            }
         }
 
         /// <summary>
         /// 获取最近指定数量的游戏日志
         /// </summary>
-        /// <param name="count">获取数量</param>
-        /// <returns>游戏日志列表，查询失败返回空列表</returns>
         public static List<DBModels.DbGameLog> GetGameLogs(int count)
         {
             var dBContext = new SQLiteDBContext();
@@ -279,15 +301,16 @@ namespace LiveOn.Game
                     "SELECT * FROM GameLog ORDER BY CreateTime DESC LIMIT @Count;",
                     new { Count = count });
             }
-            catch { return new List<DBModels.DbGameLog>(); }
+            catch (Exception ex)
+            {
+                Log.Error("查询游戏日志失败", ex);
+                return new List<DBModels.DbGameLog>();
+            }
         }
 
         /// <summary>
         /// 分页获取游戏日志
         /// </summary>
-        /// <param name="page">页码（从1开始）</param>
-        /// <param name="pageSize">每页数量</param>
-        /// <returns>游戏日志列表，查询失败返回空列表</returns>
         public static List<DBModels.DbGameLog> GetGameLogsPaged(int page, int pageSize)
         {
             var dBContext = new SQLiteDBContext();
@@ -299,13 +322,16 @@ namespace LiveOn.Game
                     "SELECT * FROM GameLog ORDER BY CreateTime DESC LIMIT @PageSize OFFSET @Offset;",
                     new { PageSize = pageSize, Offset = offset });
             }
-            catch { return new List<DBModels.DbGameLog>(); }
+            catch (Exception ex)
+            {
+                Log.Error("分页查询游戏日志失败", ex);
+                return new List<DBModels.DbGameLog>();
+            }
         }
 
         /// <summary>
         /// 获取游戏日志总数
         /// </summary>
-        /// <returns>日志总数，查询失败返回 0</returns>
         public static int GetGameLogCount()
         {
             var dBContext = new SQLiteDBContext();
@@ -314,7 +340,11 @@ namespace LiveOn.Game
             {
                 return conn.ExecuteScalar<int>("SELECT COUNT(*) FROM GameLog;");
             }
-            catch { return 0; }
+            catch (Exception ex)
+            {
+                Log.Error("查询游戏日志总数失败", ex);
+                return 0;
+            }
         }
 
         #endregion

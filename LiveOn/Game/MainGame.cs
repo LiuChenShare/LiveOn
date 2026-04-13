@@ -3,6 +3,7 @@ using LiveOn.Game.DTO;
 using LiveOn.Game.Entitys;
 using LiveOn.Game.Items;
 using System.ComponentModel;
+using log4net;
 
 namespace LiveOn.Game
 {
@@ -11,6 +12,11 @@ namespace LiveOn.Game
     /// </summary>
     public class MainGame
     {
+        /// <summary>
+        /// Log4Net 日志实例
+        /// </summary>
+        private static readonly ILog Log = LogManager.GetLogger(typeof(MainGame));
+
         #region 单例
         private static volatile MainGame instance;
         private static object syncRoot = new Object();
@@ -142,6 +148,7 @@ namespace LiveOn.Game
             {
                 var item1 = new Item(); item1.Init("1"); initItems.Add(item1);
                 var item2 = new Item(); item2.Init("2"); initItems.Add(item2);
+                var item3 = new Item(); item3.Init("3"); initItems.Add(item3);
             }
             Grain.Instance.Items.AddRange(initItems);
 
@@ -323,7 +330,13 @@ namespace LiveOn.Game
                 Id = block.Id,
                 Stata = block.Stata,
                 Entity = entityVO,
-                Scripts = block.GetScript().Select(s => new ScriptVO { Name = s.Name, Description = s.Description, ScriptCode = s.ScriptCode }).ToList()
+                Scripts = block.GetScript().Select(s => new ScriptVO
+                {
+                    Name = s.Name,
+                    Description = s.Description,
+                    ScriptCode = s.ScriptCode,
+                    Items = s.Items?.Select(i => new ScriptVO { Name = i.Name, Description = i.Description, ScriptCode = i.ScriptCode }).ToList()
+                }).ToList()
             };
         }
 
@@ -400,28 +413,34 @@ namespace LiveOn.Game
             if (block == null) return (false, "区块不存在");
 
             // 种植（区块操作，不走实体交互）
-            if (interactionId == "plant")
+            if (interactionId.StartsWith("plant"))
             {
-                var seedItem = Grain.Instance.Items.FirstOrDefault(x => x.Code == "1" && !x.IsDeleted);
+                // 解析种植目标实体编码：plant 或 plant:entityCode
+                var targetEntityCode = interactionId.Contains(':')
+                    ? interactionId.Substring(interactionId.IndexOf(':') + 1)
+                    : "1";
+
+                // 从背包中找到 ToEntityCode 匹配的物品并消耗
+                var seedItem = Grain.Instance.Items.FirstOrDefault(x => !x.IsDeleted && x.ToEntityCode == targetEntityCode);
                 if (seedItem == null)
                 {
-                    AddLog("种植", "种植失败，没有种子");
-                    return (false, "没有种子可以种植");
+                    AddLog("种植", "种植失败，没有可用的种子");
+                    return (false, "没有可用的种子");
                 }
 
-                var entity = Entity.Create("1");
+                var entity = Entity.Create(targetEntityCode);
                 if (entity == null)
                 {
                     AddLog("种植", "种植失败，实体创建失败");
                     return (false, "无法创建实体");
                 }
 
-                entity.Init("1");
+                entity.Init(targetEntityCode);
                 block.Entity = entity;
                 seedItem.Deleted();
                 SaveGame();
-                AddLog("种植", "成功种植了一颗杂树种子", 1);
-                return (true, "成功种植了一颗杂树种子");
+                AddLog("种植", $"成功种植了{entity.Name}", 1);
+                return (true, $"成功种植了{entity.Name}");
             }
 
             // 实体交互 — 直接多态调用
@@ -515,7 +534,10 @@ namespace LiveOn.Game
                 DBResponse.SaveEntitys(grain.Blocks.Where(b => b.Entity != null).Select(b => b.Entity).ToList());
                 DBResponse.SaveItems(grain.Items);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Error("保存游戏状态失败", ex);
+            }
         }
 
         /// <summary>
@@ -590,8 +612,9 @@ namespace LiveOn.Game
                 GameState = (GameStateType)mainGameData.GameState;
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Error("加载游戏存档失败", ex);
                 return false;
             }
         }

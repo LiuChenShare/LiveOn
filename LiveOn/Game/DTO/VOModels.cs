@@ -85,6 +85,8 @@ namespace LiveOn.Game.DTO
         public string Description { get; set; }
         /// <summary>交互标识码</summary>
         public string ScriptCode { get; set; }
+        /// <summary>子操作列表（如种植的选项列表）</summary>
+        public List<ScriptVO> Items { get; set; }
     }
 
     /// <summary>

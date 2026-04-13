@@ -1,18 +1,15 @@
-﻿using LiveOn.Core;
-using LiveOn.Game.Entitys;
-using System.Xml.Linq;
-
 namespace LiveOn.Game.Items
 {
     /// <summary>
     /// 物品 — 游戏中的可收集/可使用的物品
     /// </summary>
-    public partial class Item
+    public class Item
     {
         /// <summary>
         /// 物品唯一标识
         /// </summary>
         public string Id { get; internal set; }
+
         /// <summary>
         /// 物品名称
         /// </summary>
@@ -26,33 +23,64 @@ namespace LiveOn.Game.Items
         /// <summary>
         /// 物品创建时间（游戏内时间）
         /// </summary>
-        public DateTime  CreateTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
-
+        /// <summary>
+        /// 种植后生成的实体编码（仅种子类物品有值，如 "1" 表示种下后变成 code=1 的种子实体）
+        /// </summary>
+        public string ToEntityCode { get; set; }
 
         /// <summary>
         /// 是否已被删除
         /// </summary>
         public bool IsDeleted { get; private set; }
 
+        /// <summary>
+        /// 物品注册表，Key 为编码，Value 为模板定义
+        /// </summary>
+        private static readonly Dictionary<string, Item> _registry = new();
 
         /// <summary>
-        /// 根据物品编码初始化物品
+        /// 注册物品模板（在 VariableUtility 中调用）
+        /// </summary>
+        public static void RegisterTemplate(string code, Item template)
+        {
+            _registry[code] = template;
+        }
+
+        /// <summary>
+        /// 根据编码创建物品实例并初始化
         /// </summary>
         /// <param name="code">物品编码</param>
-        /// <returns>是否初始化成功</returns>
+        /// <returns>创建成功返回实例，编码不存在返回 null</returns>
+        public static Item Create(string code)
+        {
+            var template = _registry.GetValueOrDefault(code);
+            if (template == null) return null;
+
+            return new Item
+            {
+                Code = template.Code,
+                Name = template.Name,
+                ToEntityCode = template.ToEntityCode,
+                Id = Guid.NewGuid().ToString(),
+                CreateTime = MainGame.Instance.GameDate
+            };
+        }
+
+        /// <summary>
+        /// 根据编码初始化物品（兼容旧调用方式）
+        /// </summary>
         public bool Init(string code)
         {
-            var itemModel = VariableUtility.ItemModel.GetValueOrDefault(code);
+            var item = Create(code);
+            if (item == null) return false;
 
-            if (itemModel == null)
-                return false;
-
-            Name = itemModel.Name;
-            Code = itemModel.Code;
-            Id = Guid.NewGuid().ToString();
-            CreateTime = MainGame.Instance.GameDate;
-
+            Name = item.Name;
+            Code = item.Code;
+            ToEntityCode = item.ToEntityCode;
+            Id = item.Id;
+            CreateTime = item.CreateTime;
             return true;
         }
 
@@ -62,7 +90,7 @@ namespace LiveOn.Game.Items
         /// <returns>是否删除成功（已删除的物品返回 false）</returns>
         public bool Deleted()
         {
-            if(IsDeleted) return false;
+            if (IsDeleted) return false;
 
             IsDeleted = true;
             return true;

@@ -319,6 +319,65 @@ a:hover { color: #7bc366; }
 .script-btn .script-name { font-weight: 600; }
 .script-btn .script-desc { font-size: 0.75rem; color: var(--text-secondary); }
 
+/* ===== 种植下拉菜单 ===== */
+.script-dropdown { position: relative; }
+
+.script-dropdown-toggle {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: var(--block-active);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.script-dropdown-toggle:hover {
+    background-color: var(--block-hover);
+    border-color: var(--accent-green);
+}
+
+.dropdown-arrow { font-size: 0.8rem; transition: transform 0.2s; }
+
+.script-dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+
+.script-dropdown-menu {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.script-dropdown.open .script-dropdown-menu { display: flex; }
+
+.script-dropdown-item {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.script-dropdown-item:hover {
+    background-color: var(--block-hover);
+    border-color: var(--accent-green);
+    color: #fff;
+}
+
+.dropdown-item-name { font-weight: 500; }
+.dropdown-item-desc { font-size: 0.7rem; color: var(--text-secondary); }
+
 /* ===== 滚动条 ===== */
 .panel-body::-webkit-scrollbar,
 .log-container::-webkit-scrollbar {

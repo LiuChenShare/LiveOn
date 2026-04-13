@@ -33,12 +33,34 @@ namespace LiveOn.Game
             if (Entity == null || Entity.IsDeleted)
             {
                 // 种植是区块操作，不是实体操作
-                result.Add(new ScriptItem
+                // 遍历背包，找出所有有 ToEntityCode 且对应实体可种植的物品
+                var plantableItems = Grain.Instance.Items
+                    .Where(x => !x.IsDeleted && !string.IsNullOrEmpty(x.ToEntityCode)
+                                 && Entity.Create(x.ToEntityCode) != null)
+                    .GroupBy(x => new { x.Code, x.Name, x.ToEntityCode })
+                    .Select(g => new { g.Key.Code, g.Key.Name, g.Key.ToEntityCode, Count = g.Count() })
+                    .ToList();
+
+                if (plantableItems.Count > 0)
                 {
-                    Name = "种植",
-                    ScriptCode = "plant",
-                    Description = "种点什么"
-                });
+                    var plantScript = new ScriptItem
+                    {
+                        Name = "种植",
+                        ScriptCode = "plant",
+                        Description = "种点什么",
+                        Items = new List<ScriptItem>()
+                    };
+                    foreach (var item in plantableItems)
+                    {
+                        plantScript.Items.Add(new ScriptItem
+                        {
+                            Name = $"{item.Name} x{item.Count}",
+                            ScriptCode = $"plant:{item.ToEntityCode}",
+                            Description = item.Name
+                        });
+                    }
+                    result.Add(plantScript);
+                }
             }
 
             if (Entity != null && !Entity.IsDeleted)

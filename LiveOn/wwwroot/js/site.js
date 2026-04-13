@@ -1,7 +1,9 @@
 // ===== 游戏面板交互 =====
 var gameState = {
     status: 'Init',
-    pollTimer: null
+    pollTimer: null,
+    blocksTimer: null,
+    lastBlocksJson: ''
 };
 
 // 全局 AJAX 401 处理 — 跳转登录页
@@ -29,12 +31,16 @@ $(document).ready(function () {
 
 // ===== 轮询 =====
 function startPolling() {
-    if (gameState.pollTimer) clearInterval(gameState.pollTimer);
-    gameState.pollTimer = setInterval(function () {
-        refreshGameState();
-        refreshBlocks();
-        refreshItems();
-    }, 1000);
+    stopPolling();
+    // 游戏状态：1秒轮询（游戏日期每秒变）
+    gameState.pollTimer = setInterval(refreshGameState, 1000);
+    // 区块：60秒轮询（实体状态变化很慢）
+    gameState.blocksTimer = setInterval(refreshBlocks, 60000);
+}
+
+function stopPolling() {
+    if (gameState.pollTimer) { clearInterval(gameState.pollTimer); gameState.pollTimer = null; }
+    if (gameState.blocksTimer) { clearInterval(gameState.blocksTimer); gameState.blocksTimer = null; }
 }
 
 // ===== 游戏状态 =====
@@ -42,6 +48,8 @@ function refreshGameState() {
     $.getJSON('/Game/GetGameState', function (data) {
         gameState.status = data.gameState;
         updateStatusBar(data);
+        // 暂停时停止轮询
+        if (data.gameState === 'Paused') stopPolling();
     });
 }
 
@@ -76,6 +84,7 @@ function updateStatusBar(data) {
 function startGame() {
     $.post('/Game/StartGame', function () {
         refreshGameState();
+        refreshBlocks();
         refreshLogs();
     });
 }
@@ -89,7 +98,9 @@ function pauseGame() {
 
 function resumeGame() {
     $.post('/Game/ProceedGame', function () {
+        startPolling();
         refreshGameState();
+        refreshBlocks();
         refreshLogs();
     });
 }
@@ -97,6 +108,9 @@ function resumeGame() {
 // ===== 区块 =====
 function refreshBlocks() {
     $.getJSON('/Game/GetBlocks', function (data) {
+        var json = JSON.stringify(data);
+        if (json === gameState.lastBlocksJson) return; // 数据没变，跳过 DOM 重建
+        gameState.lastBlocksJson = json;
         renderBlocks(data);
     });
 }
@@ -226,22 +240,45 @@ function openBlockDetail(blockId) {
             html += '<div class="script-actions">';
             for (var i = 0; i < data.scripts.length; i++) {
                 var s = data.scripts[i];
-                html += '<button class="script-btn" onclick="executeScript(' + data.id + ',\'' + s.scriptCode + '\')">';
-                html += '<div class="script-name">' + s.name + '</div>';
-                html += '<div class="script-desc">' + s.description + '</div>';
-                html += '</button>';
+                // 有子选项（如种植）渲染为下拉列表
+                if (s.items && s.items.length > 0) {
+                    html += '<div class="script-dropdown">';
+                    html += '<div class="script-dropdown-toggle">' + s.name + ' <span class="dropdown-arrow">▾</span></div>';
+                    html += '<div class="script-dropdown-menu">';
+                    for (var j = 0; j < s.items.length; j++) {
+                        var item = s.items[j];
+                        html += '<button class="script-dropdown-item" onclick="executeScript(' + data.id + ',\'' + item.scriptCode + '\')">';
+                        html += '<span class="dropdown-item-name">' + item.name + '</span>';
+                        html += '<span class="dropdown-item-desc">' + item.description + '</span>';
+                        html += '</button>';
+                    }
+                    html += '</div></div>';
+                } else {
+                    html += '<button class="script-btn" onclick="executeScript(' + data.id + ',\'' + s.scriptCode + '\')">';
+                    html += '<div class="script-name">' + s.name + '</div>';
+                    html += '<div class="script-desc">' + s.description + '</div>';
+                    html += '</button>';
+                }
             }
             html += '</div>';
         }
 
         $('#blockModalBody').html(html);
+        // 绑定下拉菜单展开/收起
+        $('#blockModalBody').find('.script-dropdown-toggle').on('click', function () {
+            $(this).parent().toggleClass('open');
+        });
+        // 点击选项后关闭菜单
+        $('#blockModalBody').find('.script-dropdown-item').on('click', function () {
+            $(this).closest('.script-dropdown').removeClass('open');
+        });
         new bootstrap.Modal('#blockModal').show();
     });
 }
 
 // ===== 执行操作 =====
-function executeScript(blockId, scriptCode) {
-    $.post('/Game/ExecuteScript', { blockId: blockId, scriptCode: scriptCode }, function (res) {
+function executeScript(blockId, interactionId) {
+    $.post('/Game/ExecuteScript', { blockId: blockId, interactionId: interactionId }, function (res) {
         if (res.success) {
             showToast(res.message, 'success');
         } else {

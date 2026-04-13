@@ -1,4 +1,5 @@
 using System.Text.Json;
+using log4net;
 
 namespace LiveOn.Game.Entitys
 {
@@ -7,6 +8,8 @@ namespace LiveOn.Game.Entitys
     /// </summary>
     public class SeedEntity : Entity
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SeedEntity));
+
         static SeedEntity()
         {
             Register<SeedEntity>("1");
@@ -103,7 +106,10 @@ namespace LiveOn.Game.Entitys
                 if (doc.RootElement.TryGetProperty("growth_time", out var g)) GrowthTime = g.GetInt32();
                 if (doc.RootElement.TryGetProperty("to_code", out var t)) ToCode = t.GetString() ?? "";
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Error($"反序列化种子属性失败: {json}", ex);
+            }
         }
     }
 }

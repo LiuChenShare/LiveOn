@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Globalization;
 using LiveOn.Controllers;
 using Microsoft.Extensions.DependencyInjection;
+using log4net;
 
 namespace LiveOn.Core
 {
@@ -19,10 +20,9 @@ namespace LiveOn.Core
         private readonly Stopwatch Timmer = new Stopwatch();
 
         /// <summary>
-        /// 日志记录器
+        /// Log4Net 日志实例
         /// </summary>
-        public static ILogger _logger;
-
+        private static readonly ILog Log = LogManager.GetLogger(typeof(GlobalActionFilter));
 
 
         /// <summary>
@@ -31,12 +31,7 @@ namespace LiveOn.Core
         /// <param name="context">Action 执行上下文</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-
-
-            log4net.ILog log = log4net.LogManager.GetLogger(typeof(GlobalActionFilter));
-
             Timmer.Restart();
-
 
             //跳过权限验证
             var isDefined = false;
@@ -53,8 +48,6 @@ namespace LiveOn.Core
 
             if (!isDefined)
             {
-                _logger.LogInformation("wahahahhahha");
-                //Timmer.Start();
                 var apiKey2 = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
                 var apiKey = context.HttpContext.Request.Cookies["Authorization"];//读取cookie用户名
                 if (!string.IsNullOrEmpty(apiKey) && apiKey != "[object Object]")
@@ -66,6 +59,7 @@ namespace LiveOn.Core
                         if (DateTime.Now.Subtract(val.Item4).Minutes >= 60)
                         {
                             VariableUtility.ActiveApiKeys.TryRemove(apiKey, out val);
+                            Log.Warn($"Token过期已移除，用户: {val.Item1}");
                         }
                         else
                         {
@@ -93,6 +87,7 @@ namespace LiveOn.Core
                 }
 
                 // 未认证，返回 401
+                Log.Warn($"未认证请求被拒绝: {context.HttpContext.Request.Path}");
                 context.HttpContext.Response.StatusCode = 401;
                 context.Result = new ObjectResult(new { status = 401, message = "未登录" });
 
@@ -109,12 +104,18 @@ namespace LiveOn.Core
         {
             Timmer.Stop();
             var useTime = Timmer.ElapsedMilliseconds;
-            
-                var type = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType;
-            //_logger.WriteError(type, context.ActionDescriptor.DisplayName + "用时：" + useTime + " ms");
-            //_logger.WriteLine();
 
+            // 记录慢请求
+            if (useTime > 1000)
+            {
+                Log.Warn($"慢请求 {context.ActionDescriptor.DisplayName} 用时: {useTime} ms");
+            }
 
+            // 记录异常
+            if (context.Exception != null && !context.ExceptionHandled)
+            {
+                Log.Error($"请求异常 {context.ActionDescriptor.DisplayName}: {context.Exception.Message}", context.Exception);
+            }
 
             base.OnActionExecuted(context);
         }
