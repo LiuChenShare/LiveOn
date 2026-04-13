@@ -4,33 +4,20 @@ namespace LiveOn.Game.Entitys
 {
     /// <summary>
     /// 实体基类，表示游戏中的各种可交互对象
-    /// 子类通过静态构造函数调用 Register 注册自己，新增实体只需新建子类文件
+    /// 实体编码与类型的映射关系在 VariableUtility.EntityModel 中定义
     /// </summary>
     public abstract class Entity
     {
-        #region 静态注册
-
-        /// <summary>
-        /// 实体注册表，Key 为编码，Value 为工厂方法
-        /// </summary>
-        private static readonly Dictionary<string, Func<Entity>> _registry = new();
-
-        /// <summary>
-        /// 子类在静态构造函数中调用，将自身注册到工厂
-        /// </summary>
-        /// <typeparam name="T">子类类型，必须有 public 无参构造函数</typeparam>
-        /// <param name="code">实体编码</param>
-        protected static void Register<T>(string code) where T : Entity, new()
-        {
-            _registry[code] = () => new T();
-        }
+        #region 工厂方法
 
         /// <summary>
         /// 根据编码创建对应子类实例，未注册的编码返回 null
         /// </summary>
         public static Entity Create(string code)
         {
-            return _registry.TryGetValue(code, out var factory) ? factory() : null;
+            var type = Core.VariableUtility.EntityModel.GetValueOrDefault(code);
+            if (type == null) return null;
+            return (Entity)Activator.CreateInstance(type);
         }
 
         #endregion

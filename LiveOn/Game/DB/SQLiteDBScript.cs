@@ -44,11 +44,10 @@ namespace LiveOn.Game.DB
                     ""Name"" NVARCHAR,
                     ""Code"" NVARCHAR,
                     ""CreateTime"" TIMESTAMP,
+                    ""ToEntityCode"" NVARCHAR,
                     ""IsDeleted"" integer,
                     PRIMARY KEY (""Id"")
                 );
-            "},
-            { 2, @"
                 CREATE TABLE IF NOT EXISTS GameLog (
                     ""Id"" NVARCHAR NOT NULL,
                     ""Type"" integer DEFAULT 0,

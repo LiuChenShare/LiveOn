@@ -605,6 +605,7 @@ namespace LiveOn.Game
                         item.Name = dbItem.Name;
                         item.Code = dbItem.Code;
                         item.CreateTime = dbItem.CreateTime;
+                        item.ToEntityCode = dbItem.ToEntityCode;
                         grain.Items.Add(item);
                     }
                 }

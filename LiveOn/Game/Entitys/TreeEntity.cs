@@ -11,11 +11,6 @@ namespace LiveOn.Game.Entitys
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(TreeEntity));
 
-        static TreeEntity()
-        {
-            Register<TreeEntity>("0");
-        }
-
         /// <summary>树高</summary>
         public double TreeHigh { get; set; }
 

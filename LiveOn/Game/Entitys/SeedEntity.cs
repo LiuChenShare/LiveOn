@@ -10,11 +10,6 @@ namespace LiveOn.Game.Entitys
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SeedEntity));
 
-        static SeedEntity()
-        {
-            Register<SeedEntity>("1");
-        }
-
         /// <summary>成长所需游戏分钟数</summary>
         public int GrowthTime { get; set; }
 

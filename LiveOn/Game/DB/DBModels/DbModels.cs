@@ -55,6 +55,8 @@ namespace LiveOn.Game.DBModels
         public string Code { get; set; }
         /// <summary>创建时间</summary>
         public DateTime CreateTime { get; set; }
+        /// <summary>种植后生成的实体编码</summary>
+        public string ToEntityCode { get; set; }
         public bool IsDeleted { get; set; }
     }
 

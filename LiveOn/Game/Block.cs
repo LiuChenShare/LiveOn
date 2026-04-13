@@ -36,7 +36,7 @@ namespace LiveOn.Game
                 // 遍历背包，找出所有有 ToEntityCode 且对应实体可种植的物品
                 var plantableItems = Grain.Instance.Items
                     .Where(x => !x.IsDeleted && !string.IsNullOrEmpty(x.ToEntityCode)
-                                 && Entity.Create(x.ToEntityCode) != null)
+                                 && Core.VariableUtility.EntityModel.ContainsKey(x.ToEntityCode))
                     .GroupBy(x => new { x.Code, x.Name, x.ToEntityCode })
                     .Select(g => new { g.Key.Code, g.Key.Name, g.Key.ToEntityCode, Count = g.Count() })
                     .ToList();

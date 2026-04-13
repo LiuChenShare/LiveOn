@@ -1,4 +1,5 @@
 ﻿using LiveOn.Game.Dungeons;
+using LiveOn.Game.Entitys;
 using LiveOn.Game.Items;
 using log4net.Core;
 
@@ -24,6 +25,18 @@ namespace LiveOn.Core
                 { "2", new Item() { Code = "2", Name = "木材" } },
                 { "3", new Item() { Code = "3", Name = "杂树种子", ToEntityCode = "1" } }
             };
+        #endregion
+
+        #region 实体
+        /// <summary>
+        /// 实体类型字典，Key 为实体编码，Value 为实体类型
+        /// 新增实体时在此处添加映射即可
+        /// </summary>
+        public static Dictionary<string, Type> EntityModel = new Dictionary<string, Type>
+        {
+            { "0", typeof(TreeEntity) },
+            { "1", typeof(SeedEntity) }
+        };
         #endregion
 
         #region 地下城
