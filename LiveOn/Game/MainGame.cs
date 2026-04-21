@@ -232,13 +232,50 @@ namespace LiveOn.Game
             foreach (var item in code_numbers)
             {
                 var items = Grain.Instance.Items.Where(x => x.Code == item.Key && !x.IsDeleted).OrderBy(x => x.CreateTime).Take(item.Value).ToList();
-                if (items.Count == item.Value)
+                if (items.Count != item.Value)
                     return false;
                 removeItems.AddRange(items);
             }
             foreach (var item in removeItems)
                 item.Deleted();
             return true;
+        }
+
+        /// <summary>
+        /// 丢弃指定编码的物品
+        /// </summary>
+        /// <param name="code">物品编码</param>
+        /// <param name="count">丢弃数量</param>
+        /// <returns>是否成功及提示消息</returns>
+        public (bool success, string message) DiscardItem(string code, int count)
+        {
+            if (string.IsNullOrEmpty(code) || count <= 0)
+                return (false, "参数无效");
+
+            // 查询当前持有数量
+            var available = Grain.Instance.Items.Count(x => x.Code == code && !x.IsDeleted);
+            if (available == 0)
+                return (false, "背包中没有该物品");
+            if (count > available)
+                return (false, $"丢弃数量超过持有量（当前持有 {available} 个）");
+
+            // 按创建时间升序取最旧的 count 个标记删除
+            var toRemove = Grain.Instance.Items
+                .Where(x => x.Code == code && !x.IsDeleted)
+                .OrderBy(x => x.CreateTime)
+                .Take(count)
+                .ToList();
+
+            foreach (var item in toRemove)
+                item.Deleted();
+
+            SaveGame(force: true);
+
+            // 获取物品名称
+            var template = Core.VariableUtility.ItemModel.GetValueOrDefault(code);
+            var name = template?.Name ?? code;
+            AddLog("丢弃", $"已丢弃 {count} 个 {name}");
+            return (true, $"已丢弃 {count} 个 {name}");
         }
 
         #endregion
@@ -286,6 +323,25 @@ namespace LiveOn.Game
 
                 return vo;
             }).ToList();
+        }
+
+        /// <summary>
+        /// 获取所有空闲区块（无实体）
+        /// </summary>
+        /// <returns>空闲区块概览列表</returns>
+        public List<BlockOverviewVO> GetFreeBlocks()
+        {
+            return Grain.Instance.Blocks
+                .Where(b => b.Entity == null)
+                .Select(b => new BlockOverviewVO
+                {
+                    Id = b.Id,
+                    Stata = b.Stata,
+                    HasEntity = false,
+                    EntityName = null,
+                    EntityType = null
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -341,13 +397,28 @@ namespace LiveOn.Game
         }
 
         /// <summary>
-        /// 获取物品汇总信息，按编码分组统计数量
+        /// 获取物品汇总信息，按编码分组统计数量，按类型和数量排序
         /// </summary>
         public List<ItemSummaryVO> GetItemSummary()
         {
-            return Grain.Instance.Items.Where(x => !x.IsDeleted)
-                .GroupBy(x => new { x.Code, x.Name })
-                .Select(g => new ItemSummaryVO { Code = g.Key.Code, Name = g.Key.Name, Count = g.Count() })
+            return Grain.Instance.Items
+                .Where(x => !x.IsDeleted)
+                .GroupBy(x => x.Code)
+                .Select(g =>
+                {
+                    var first = g.First();
+                    return new ItemSummaryVO
+                    {
+                        Code = first.Code,
+                        Name = first.Name,
+                        Count = g.Count(),
+                        ItemType = first.ItemType.ToString(),
+                        CanPlant = !string.IsNullOrEmpty(first.ToEntityCode),
+                        ToEntityCode = first.ToEntityCode
+                    };
+                })
+                .OrderBy(x => x.ItemType == "Seed" ? 0 : x.ItemType == "Material" ? 1 : x.ItemType == "Equipment" ? 2 : x.ItemType == "Consumable" ? 3 : 9)
+                .ThenByDescending(x => x.Count)
                 .ToList();
         }
 
@@ -606,6 +677,9 @@ namespace LiveOn.Game
                         item.Code = dbItem.Code;
                         item.CreateTime = dbItem.CreateTime;
                         item.ToEntityCode = dbItem.ToEntityCode;
+                        // 从模板获取正确类型，兼容旧数据（DB 默认值为 Other）
+                        var template = Core.VariableUtility.ItemModel.GetValueOrDefault(dbItem.Code);
+                        item.ItemType = template?.ItemType ?? (Items.ItemType)(dbItem.ItemType >= 0 && dbItem.ItemType <= 9 ? dbItem.ItemType : 9);
                         grain.Items.Add(item);
                     }
                 }

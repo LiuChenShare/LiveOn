@@ -31,6 +31,11 @@ namespace LiveOn.Game.Items
         public string ToEntityCode { get; set; }
 
         /// <summary>
+        /// 物品类型，影响背包排序和 UI 展示
+        /// </summary>
+        public ItemType ItemType { get; set; } = ItemType.Other;
+
+        /// <summary>
         /// 是否已被删除
         /// </summary>
         public bool IsDeleted { get; private set; }
@@ -50,6 +55,7 @@ namespace LiveOn.Game.Items
                 Code = template.Code,
                 Name = template.Name,
                 ToEntityCode = template.ToEntityCode,
+                ItemType = template.ItemType,
                 Id = Guid.NewGuid().ToString(),
                 CreateTime = MainGame.Instance.GameDate
             };
@@ -66,6 +72,7 @@ namespace LiveOn.Game.Items
             Name = item.Name;
             Code = item.Code;
             ToEntityCode = item.ToEntityCode;
+            ItemType = item.ItemType;
             Id = item.Id;
             CreateTime = item.CreateTime;
             return true;

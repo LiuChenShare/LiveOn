@@ -231,22 +231,24 @@ namespace LiveOn.Game
 
                     if (exists == null)
                     {
-                        conn.Execute(@"INSERT INTO Item(Id, Name, Code, CreateTime, ToEntityCode, IsDeleted) VALUES (@Id, @Name, @Code, @CreateTime, @ToEntityCode, @IsDeleted);",
+                        conn.Execute(@"INSERT INTO Item(Id, Name, Code, CreateTime, ToEntityCode, IsDeleted, ItemType) VALUES (@Id, @Name, @Code, @CreateTime, @ToEntityCode, @IsDeleted, @ItemType);",
                             new
                             {
                                 Id = item.Id, Name = item.Name, Code = item.Code,
                                 CreateTime = item.CreateTime, ToEntityCode = item.ToEntityCode,
-                                IsDeleted = item.IsDeleted ? 1 : 0
+                                IsDeleted = item.IsDeleted ? 1 : 0,
+                                ItemType = (int)item.ItemType
                             });
                     }
                     else
                     {
-                        conn.Execute(@"UPDATE Item SET Name=@Name, Code=@Code, CreateTime=@CreateTime, ToEntityCode=@ToEntityCode, IsDeleted=@IsDeleted WHERE Id=@Id;",
+                        conn.Execute(@"UPDATE Item SET Name=@Name, Code=@Code, CreateTime=@CreateTime, ToEntityCode=@ToEntityCode, IsDeleted=@IsDeleted, ItemType=@ItemType WHERE Id=@Id;",
                             new
                             {
                                 Id = item.Id, Name = item.Name, Code = item.Code,
                                 CreateTime = item.CreateTime, ToEntityCode = item.ToEntityCode,
-                                IsDeleted = item.IsDeleted ? 1 : 0
+                                IsDeleted = item.IsDeleted ? 1 : 0,
+                                ItemType = (int)item.ItemType
                             });
                     }
                 }

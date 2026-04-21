@@ -100,6 +100,12 @@ namespace LiveOn.Game.DTO
         public string Name { get; set; }
         /// <summary>物品数量</summary>
         public int Count { get; set; }
+        /// <summary>物品类型（字符串，如 "Seed"、"Material"）</summary>
+        public string ItemType { get; set; }
+        /// <summary>是否可种植（种子类物品为 true）</summary>
+        public bool CanPlant { get; set; }
+        /// <summary>种植后生成的实体编码（仅种子类有值）</summary>
+        public string ToEntityCode { get; set; }
     }
 
     /// <summary>

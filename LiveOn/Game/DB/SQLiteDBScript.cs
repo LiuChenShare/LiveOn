@@ -59,6 +59,9 @@ namespace LiveOn.Game.DB
                 );
                 CREATE INDEX IF NOT EXISTS idx_gamelog_createtime ON GameLog(CreateTime);
             "},
+            { 2, @"
+                ALTER TABLE Item ADD COLUMN ItemType integer DEFAULT 9;
+            "},
         };
     }
 }

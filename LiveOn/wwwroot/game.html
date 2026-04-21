@@ -74,6 +74,15 @@
                             <h6>背包</h6>
                             <span class="text-muted" id="itemCount">0 件</span>
                         </div>
+                        <!-- 类型筛选栏（多选，全不选视为全选） -->
+                        <div class="item-filter-bar" id="itemFilterBar">
+                            <button class="filter-btn" data-filter="All">全部</button>
+                            <button class="filter-btn" data-filter="Seed">种子</button>
+                            <button class="filter-btn" data-filter="Material">材料</button>
+                            <button class="filter-btn" data-filter="Equipment">装备</button>
+                            <button class="filter-btn" data-filter="Consumable">消耗品</button>
+                            <button class="filter-btn" data-filter="Other">其他</button>
+                        </div>
                         <div class="panel-body">
                             <div id="itemList" class="item-list"></div>
                         </div>
@@ -104,6 +113,48 @@
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body" id="blockModalBody"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 丢弃确认模态框 -->
+            <div class="modal fade" id="discardModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content game-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="discardModalTitle">丢弃物品</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="discardModalMsg" style="font-size:0.9rem;"></p>
+                            <div class="mb-2">
+                                <label class="form-label text-muted" style="font-size:0.8rem;">丢弃数量</label>
+                                <input type="number" class="form-control form-control-sm" id="discardCountInput"
+                                       min="1" value="1" style="background-color:var(--bg-tertiary);border-color:var(--border-color);color:var(--text-primary);" />
+                                <div class="text-muted" style="font-size:0.75rem;margin-top:4px;" id="discardHoldInfo"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-top-color:var(--border-color);">
+                            <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
+                                    style="background-color:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color);">取消</button>
+                            <button type="button" class="btn btn-sm" id="btnConfirmDiscard"
+                                    style="background-color:var(--accent-red);color:#fff;border:none;">确认丢弃</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 种植区块选择模态框 -->
+            <div class="modal fade" id="plantBlockModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content game-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="plantModalTitle">种植</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="plantModalBody">
+                            <!-- 动态渲染空闲区块网格或提示 -->
+                        </div>
                     </div>
                 </div>
             </div>

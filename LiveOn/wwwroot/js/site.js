@@ -27,6 +27,49 @@ $(document).ready(function () {
     $('#btnPause').on('click', pauseGame);
     $('#btnResume').on('click', resumeGame);
     $('#btnClearLog').on('click', function () { $('#logContainer').empty(); });
+
+    // 背包类型筛选按钮（多选，「全部」点击后仅选中它）
+    $('#itemFilterBar').on('click', '.filter-btn', function () {
+        var filter = $(this).data('filter');
+        if (filter === 'All') {
+            $('#itemFilterBar .filter-btn').removeClass('active');
+            $(this).addClass('active');
+        } else {
+            $('#itemFilterBar .filter-btn[data-filter="All"]').removeClass('active');
+            $(this).toggleClass('active');
+        }
+        renderItems();
+    });
+
+    // 丢弃确认按钮
+    $('#btnConfirmDiscard').on('click', function () {
+        var code = $(this).data('code');
+        var name = $(this).data('name');
+        var count = parseInt($('#discardCountInput').val()) || 0;
+        var maxCount = parseInt($('#discardCountInput').attr('max')) || 1;
+
+        // 前端校验
+        if (count <= 0) {
+            showToast('丢弃数量必须大于 0', 'error');
+            return;
+        }
+        if (count > maxCount) {
+            showToast('丢弃数量不能超过持有量', 'error');
+            return;
+        }
+
+        $.post('/Game/DiscardItem', { code: code, count: count }, function (res) {
+            if (res.success) {
+                showToast(res.message, 'success');
+                var modal = bootstrap.Modal.getInstance('#discardModal');
+                if (modal) modal.hide();
+                refreshItems();
+                refreshLogs();
+            } else {
+                showToast(res.message, 'error');
+            }
+        });
+    });
 });
 
 // ===== 轮询 =====
@@ -161,19 +204,47 @@ function renderBlocks(blocks) {
 }
 
 // ===== 物品 =====
+/** 缓存后端返回的全部物品数据 */
+var cachedItems = [];
+
+/** 物品类型：英文→中文映射 */
+var itemTypeMap = { Seed: '种子', Material: '材料', Equipment: '装备', Consumable: '消耗品', Other: '其他' };
+
+/** 当前选中的筛选类型集合，空数组表示全选 */
+
 function refreshItems() {
     $.getJSON('/Game/GetItems', function (data) {
-        renderItems(data);
+        cachedItems = data || [];
+        renderItems();
     });
 }
 
-/** 渲染背包物品列表，显示物品名称和数量 */
-function renderItems(items) {
+/** 渲染背包物品列表，根据选中筛选类型从缓存中过滤并渲染 */
+function renderItems() {
     var $list = $('#itemList');
     $list.empty();
 
-    if (!items || items.length === 0) {
+    if (cachedItems.length === 0) {
         $list.html('<div class="text-center text-muted py-3" style="font-size:0.85rem;">背包空空如也</div>');
+        $('#itemCount').text('0 件');
+        return;
+    }
+
+    // 多选筛选：「全部」按钮或全不选均视为全选
+    var activeTypes = [];
+    var hasAll = false;
+    $('#itemFilterBar .filter-btn.active').each(function () {
+        var f = $(this).data('filter');
+        if (f === 'All') hasAll = true;
+        else activeTypes.push(f);
+    });
+    var items = cachedItems;
+    if (!hasAll && activeTypes.length > 0) {
+        items = cachedItems.filter(function (item) { return activeTypes.indexOf(item.itemType) !== -1; });
+    }
+
+    if (items.length === 0) {
+        $list.html('<div class="text-center text-muted py-3" style="font-size:0.85rem;">没有该类型物品</div>');
         $('#itemCount').text('0 件');
         return;
     }
@@ -182,13 +253,87 @@ function renderItems(items) {
     for (var i = 0; i < items.length; i++) {
         var item = items[i];
         totalCount += item.count;
+
+        var typeLabel = item.itemType || 'Other';
+        var typeClass = 'item-type-badge ' + typeLabel.toLowerCase();
+        var displayName = itemTypeMap[typeLabel] || typeLabel;
+
         var html = '<div class="item-row">';
-        html += '<span class="item-name">' + item.name + '</span>';
+        html += '<div class="item-info">';
+        html += '<span class="' + typeClass + '">' + displayName + '</span>';
+        html += '<span class="item-name">' + escapeLogHtml(item.name) + '</span>';
+        html += '</div>';
         html += '<span class="item-count">x' + item.count + '</span>';
+        html += '<div class="item-actions">';
+        if (item.canPlant) {
+            html += '<button class="item-btn item-btn-use" onclick="useItem(\'' + item.code + '\',\'' + escapeLogHtml(item.name) + '\',\'' + item.toEntityCode + '\')">使用</button>';
+        }
+        html += '<button class="item-btn item-btn-discard" onclick="openDiscardDialog(\'' + item.code + '\',\'' + escapeLogHtml(item.name) + '\',' + item.count + ')">丢弃</button>';
+        html += '</div>';
         html += '</div>';
         $list.append(html);
     }
     $('#itemCount').text(totalCount + ' 件');
+}
+
+/** 点击「使用」按钮：获取空闲区块，打开种植选择面板 */
+function useItem(code, name, toEntityCode) {
+    $('#plantModalTitle').text('种植 ' + name);
+
+    $.getJSON('/Game/GetFreeBlocks', function (blocks) {
+        var $body = $('#plantModalBody');
+        $body.empty();
+
+        if (!blocks || blocks.length === 0) {
+            $body.html('<div class="text-center py-3" style="color:var(--text-secondary);">没有空闲的地块了</div>');
+            new bootstrap.Modal('#plantBlockModal').show();
+            return;
+        }
+
+        var html = '<div class="free-block-grid">';
+        for (var i = 0; i < blocks.length; i++) {
+            var b = blocks[i];
+            html += '<div class="free-block-card" onclick="plantOnBlock(' + b.id + ',\'' + toEntityCode + '\',\'' + escapeLogHtml(name) + '\')">';
+            html += '<div class="free-block-id">地块 #' + b.id + '</div>';
+            html += '<div class="free-block-icon">-</div>';
+            html += '<div class="free-block-label">空地</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+        $body.html(html);
+        new bootstrap.Modal('#plantBlockModal').show();
+    });
+}
+
+/** 选择空闲区块后执行种植 */
+function plantOnBlock(blockId, toEntityCode, name) {
+    var interactionId = 'plant:' + toEntityCode;
+    $.post('/Game/ExecuteScript', { blockId: blockId, interactionId: interactionId }, function (res) {
+        if (res.success) {
+            showToast(res.message, 'success');
+        } else {
+            showToast(res.message, 'error');
+        }
+        // 关闭种植模态框
+        var modal = bootstrap.Modal.getInstance('#plantBlockModal');
+        if (modal) modal.hide();
+        // 刷新数据
+        refreshBlocks();
+        refreshItems();
+        refreshLogs();
+    });
+}
+
+/** 打开丢弃确认模态框 */
+function openDiscardDialog(code, name, holdCount) {
+    $('#discardModalTitle').text('丢弃物品');
+    $('#discardModalMsg').text('确定要丢弃「' + name + '」吗？');
+    var $input = $('#discardCountInput');
+    $input.val(1).attr('max', holdCount);
+    $('#discardHoldInfo').text('当前持有 ' + holdCount + ' 个');
+    // 存储丢弃参数到 DOM
+    $('#btnConfirmDiscard').data('code', code).data('name', name);
+    new bootstrap.Modal('#discardModal').show();
 }
 
 // ===== 区块详情模态框 =====

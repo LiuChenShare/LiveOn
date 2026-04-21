@@ -57,6 +57,8 @@ namespace LiveOn.Game.DBModels
         public DateTime CreateTime { get; set; }
         /// <summary>种植后生成的实体编码</summary>
         public string ToEntityCode { get; set; }
+        /// <summary>物品类型（0=Seed, 1=Material, 2=Equipment, 3=Consumable, 9=Other）</summary>
+        public int ItemType { get; set; } = 9;
         public bool IsDeleted { get; set; }
     }
 

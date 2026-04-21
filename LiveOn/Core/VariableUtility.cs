@@ -21,9 +21,9 @@ namespace LiveOn.Core
         /// </summary>
         public static Dictionary<string, Item> ItemModel = new Dictionary<string, Item>
             {
-                { "1", new Item() { Code = "1", Name = "树枝" } },
-                { "2", new Item() { Code = "2", Name = "木材" } },
-                { "3", new Item() { Code = "3", Name = "杂树种子", ToEntityCode = "1" } }
+                { "1", new Item() { Code = "1", Name = "树枝", ItemType = ItemType.Material } },
+                { "2", new Item() { Code = "2", Name = "木材", ItemType = ItemType.Material } },
+                { "3", new Item() { Code = "3", Name = "杂树种子", ToEntityCode = "1", ItemType = ItemType.Seed } }
             };
         #endregion
 

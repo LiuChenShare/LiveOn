@@ -115,5 +115,27 @@ namespace LiveOn.Controllers
             var (logs, totalCount, totalPages) = MainGame.Instance.GetLogsPaged(page, pageSize);
             return Json(new { logs, totalCount, totalPages, page });
         }
+
+        /// <summary>
+        /// 丢弃物品
+        /// </summary>
+        [HttpPost]
+        public IActionResult DiscardItem(string code, int count)
+        {
+            if (string.IsNullOrEmpty(code) || count <= 0)
+                return Json(new { success = false, message = "参数无效" });
+
+            var (success, message) = MainGame.Instance.DiscardItem(code, count);
+            return Json(new { success, message });
+        }
+
+        /// <summary>
+        /// 获取空闲区块列表（用于种植选择）
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetFreeBlocks()
+        {
+            return Json(MainGame.Instance.GetFreeBlocks());
+        }
     }
 }
